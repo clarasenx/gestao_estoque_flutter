@@ -21,6 +21,7 @@ class KpiCard extends StatelessWidget {
         final isTablet = constraints.maxWidth > 600;
 
         return Card(
+          color: Colors.white,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
