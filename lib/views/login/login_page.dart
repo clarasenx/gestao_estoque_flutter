@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/views/dashboard/dashboard_page.dart';
 
 const users = [
@@ -16,12 +17,20 @@ class LoginPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Column(
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [Colors.blueAccent, Colors.white],
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        child:  Column(
         children: [
           SizedBox(height: 150),
           Center(
             child: Container(
-              width: 400,
+              width: 400,   
               margin: EdgeInsets.only(top: 20, left: 50, right: 50, bottom: 20),
               padding: EdgeInsets.only(
                 top: 20,
@@ -30,14 +39,22 @@ class LoginPage extends StatelessWidget {
                 bottom: 40,
               ),
               decoration: BoxDecoration(
-                color: Colors.blueAccent,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.2), // Cor da sombra
+                      spreadRadius: 2, // Espalhamento
+                      blurRadius: 4, // Suavidade da sombra
+                      offset: const Offset(0, 3), // Posição (x, y)
+                    ),
+                  ],
               ),
               child: Column(
                 children: [
                   SizedBox(
-                    height: 100,
-                    child: (Icon(Icons.login, size: 50, color: Colors.white)),
+                    height: 80,
+                    child: (Icon(Icons.login, size: 50, color: Colors.blueAccent)),
                   ),
                   Form(
                     key: _formKey,
@@ -73,30 +90,16 @@ class LoginPage extends StatelessWidget {
                           }
                         ),
                         SizedBox(height: 24),
-                        ElevatedButton(
-                          onPressed: () {
-                            Navigator.push(context, 
-                            MaterialPageRoute(builder: (context) => DashboardPage()));
-                          },
-                          style: ButtonStyle(
-                            backgroundColor: WidgetStatePropertyAll(
-                              Colors.white,
-                            ),
-                            padding: WidgetStatePropertyAll(
-                              EdgeInsets.symmetric(
-                                horizontal: 50,
-                                vertical: 15,
-                              ),
-                            ),
-                          ),
-                          child: const Text(
-                            'Entrar',
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              color: Colors.blueAccent,
-                            ),
-                          ),
-                        ),
+                        AppButton(text: "Entrar", onPressed: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => DashboardPage(),
+                                ),
+                              );
+                            },
+                            icon: Icons.login_rounded,
+                          )
                       ],
                     ),
                   ),
@@ -105,6 +108,7 @@ class LoginPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
       ),
     );
   }
