@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:gestao_estoque_flutter/components/buttom.dart';
+import 'package:gestao_estoque_flutter/components/datatable.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
-import 'package:gestao_estoque_flutter/components/product_table.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -34,7 +33,7 @@ class DashboardPage extends StatelessWidget {
         icon: Icons.access_time_filled,
       ),
     ];
-    
+
     return Scaffold(
       appBar: AppBar(title: const Text("Dashboard")),
       body: LayoutBuilder(
@@ -59,19 +58,9 @@ class DashboardPage extends StatelessWidget {
                 const SizedBox(height: 20),
 
                 // Tabela de Produtos
-                ProductsTable(),
+                SizedBox(height: 600, child: ProductsTable()),
 
                 const SizedBox(height: 20),
-
-                // Botão adicionar
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: AppButton(
-                    text: "Adicionar Produto",
-                    icon: Icons.add,
-                    onPressed: () {},
-                  ),
-                ),
               ],
             ),
           );
