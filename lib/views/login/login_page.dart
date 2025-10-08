@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
-import 'package:gestao_estoque_flutter/views/dashboard/dashboard_page.dart';
-
-const users = [
-  {'cpf': '1234', 'password': 'asdf'},
-  {'cpf': '5678', 'password': 'zxcv'},
-];
+import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({super.key});
@@ -91,15 +86,15 @@ class LoginPage extends StatelessWidget {
                         ),
                         SizedBox(height: 24),
                         AppButton(text: "Entrar", onPressed: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => DashboardPage(),
-                                ),
-                              );
-                            },
-                            icon: Icons.login_rounded,
-                          )
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DashboardPage(),
+                              ),
+                            );
+                          },
+                          icon: Icons.login_rounded,
+                        )
                       ],
                     ),
                   ),
