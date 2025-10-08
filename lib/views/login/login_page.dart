@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
-import 'package:gestao_estoque_flutter/views/dashboard/dashboard_page.dart';
+import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
+import 'package:gestao_estoque_flutter/views/app/home_page.dart';
 
 const users = [
   {'cpf': '1234', 'password': 'asdf'},
@@ -94,7 +95,7 @@ class LoginPage extends StatelessWidget {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => DashboardPage(),
+                                  builder: (context) => HomePage(),
                                 ),
                               );
                             },

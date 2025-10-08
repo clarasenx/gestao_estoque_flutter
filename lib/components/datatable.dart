@@ -1,56 +1,81 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/model/product.dart';
+import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ProductsTable extends StatelessWidget {
   const ProductsTable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(12),
-      child: Center(
-        child: PaginatedDataTable2(
-          columnSpacing: 12,
-          minWidth: 786,
-
-          dividerThickness: 0,
-          horizontalMargin: 12,
-          dataRowHeight: 56,
-          headingTextStyle: Theme.of(context).textTheme.titleMedium,
-          headingRowColor: WidgetStateProperty.resolveWith(
-            (states) => Colors.blueAccent,
-          ),
-          headingRowDecoration: const BoxDecoration(
-            borderRadius: BorderRadius.only(
-              topLeft: Radius.circular(12),
-              topRight: Radius.circular(12),
+    final controller = Get.put(ProductsController());
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: PaginatedDataTable2(
+            autoRowsToHeight: true,
+            columnSpacing: 12,
+            minWidth: 786,
+            dividerThickness: 0,
+            horizontalMargin: 12,
+            dataRowHeight: 56,
+            headingTextStyle: Theme.of(context).textTheme.titleMedium,
+            headingRowColor: WidgetStateProperty.resolveWith(
+              (states) => Colors.blueAccent,
             ),
+            headingRowDecoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
+            columns: [
+              DataColumn2(label: Text("Nome")),
+              DataColumn2(label: Text("Descrição")),
+              DataColumn2(label: Text("Categoria")),
+              DataColumn2(label: Text("Local")),
+              DataColumn2(label: Text("Qtd. Estoque")),
+              DataColumn2(label: Text("Validade")),
+            ],
+            source: ProductData(controller.products),
           ),
-          columns: [
-            DataColumn2(label: Text("Column 1")),
-            DataColumn2(label: Text("Column 2")),
-            DataColumn2(label: Text("Column 3")),
-            DataColumn2(label: Text("Column 4")),
-          ],
-          source: ProductData(),
         ),
-      ),
-    );
+      );
+    });
   }
 }
 
 class ProductData extends DataTableSource {
-  final DataController controller = Get.put(DataController());
+  final List<Product> products;
+
+  ProductData(this.products);
 
   @override
   DataRow? getRow(int index) {
+    if (index >= products.length) return null;
+
+    final product = products[index];
+
     return DataRow2(
       cells: ([
-        DataCell(Text("Coluna 1")),
-        DataCell(Text("Coluna 1")),
-        DataCell(Text("Coluna 1")),
-        DataCell(Text("Coluna 1")),
+        DataCell(Text(product.name)),
+        DataCell(Text(product.description ?? '')),
+        DataCell(Text(product.categoryId.toString())),
+        DataCell(Text(product.locationId.toString())),
+        DataCell(Text(product.currentStock.toString())),
+        DataCell(
+          Text(
+            product.expirationDate != null
+                ? DateFormat('dd/MM/yyyy').format(product.expirationDate!)
+                : 'Indefinido',
+          ),
+        ),
       ]),
     );
   }
@@ -59,32 +84,36 @@ class ProductData extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => 38;
+  int get rowCount => products.length;
 
   @override
   int get selectedRowCount => 0;
 }
 
-class DataController extends GetxController {
-  var dataList = <Map<String, String>>[].obs;
+class ProductsController extends GetxController {
+  var products = <Product>[].obs;
+  final isLoading = true.obs;
 
   @override
   void onInit() {
     super.onInit();
-    fetchDummyData();
+    fetchProducts();
   }
 
-  void fetchDummyData() {
-    dataList.addAll(
-      List.generate(
-        36,
-        (index) => {
-          'Column1': 'Data ${index + 1} - 1',
-          'Column2': 'Data ${index + 1} - 2',
-          'Column3': 'Data ${index + 1} - 3',
-          'Column4': 'Data ${index + 1} - 4',
-        },
-      ),
-    );
+  Future<void> fetchProducts() async {
+    try {
+      isLoading.value = true;
+      final dio = ApiService().dio;
+      final response = await dio.get('/product');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        products.value = data.map((e) => Product.fromJson(e)).toList();
+      }
+    } catch (e) {
+      print("Erro ao buscar produtos: $e");
+    } finally {
+      isLoading.value = false;
+    }
   }
 }
