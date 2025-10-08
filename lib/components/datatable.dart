@@ -16,7 +16,7 @@ class ProductsTable extends StatelessWidget {
         dividerThickness: 0,
         horizontalMargin: 12,
         dataRowHeight: 56,
-        headingTextStyle: Theme.of(context).textTheme.titleMedium,
+        headingTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white,),
         headingRowColor: WidgetStatePropertyAll(Colors.blueAccent),
         headingRowDecoration: const BoxDecoration(
           borderRadius: BorderRadius.only(
