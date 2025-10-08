@@ -1,9 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/datatable.dart';
+import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
+import 'package:gestao_estoque_flutter/model/product.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
+
+  @override
+  State<DashboardPage> createState() => _DashboardState();
+}
+
+class _DashboardState extends State<DashboardPage> {
+  List<Produto> produtos = List.generate(
+    10,
+    (i) => Produto(
+      nome: 'Produto ${i + 1}',
+      descricao: 'Descrição ${i + 1}',
+      categoria: i % 2 == 0 ? 'Perecível' : 'Não Perecível',
+      dataValidade: '12/0${(i % 9) + 1}/2026',
+      posicao: 'Estante ${(i % 5) + 1}',
+      estoque: 10 + i,
+    ),
+  );
+
+  String? selectedCategoria = 'Todos';
+  String? selectedPosicao = 'Todos';
+  String nomeFilter = '';
+  String validadeFilter = '';
+
+  void onCategoriaChanged(String? value) {
+    setState(() {
+      selectedCategoria = value;
+    });
+  }
+
+  void onPosicaoChanged(String? value) {
+    setState(() {
+      selectedPosicao = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -34,11 +70,18 @@ class DashboardPage extends StatelessWidget {
       ),
     ];
 
+    final filteredProducts = produtos.where((p) {
+      final matchCategoria =
+          selectedCategoria == 'Todos' || p.categoria == selectedCategoria;
+      final matchPosicao =
+          selectedPosicao == 'Todos' || p.posicao == selectedPosicao;
+      return matchCategoria && matchPosicao;
+    }).toList();
+
     return Scaffold(
       appBar: AppBar(title: const Text("Dashboard")),
       body: LayoutBuilder(
         builder: (context, constraints) {
-          // Breakpoint simples: até 600px = celular
           final isTablet = constraints.maxWidth > 600;
 
           return SingleChildScrollView(
@@ -46,7 +89,6 @@ class DashboardPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // KPIs em Grid
                 GridView.count(
                   crossAxisCount: isTablet ? 2 : 1,
                   childAspectRatio: isTablet ? 3 : 2.8,
@@ -57,8 +99,29 @@ class DashboardPage extends StatelessWidget {
 
                 const SizedBox(height: 20),
 
-                // Tabela de Produtos
-                SizedBox(height: 600, child: ProductsTable()),
+                FilterDatabase(
+                  produtos: produtos,
+                  selectedCategoria: selectedCategoria,
+                  selectedPosicao: selectedPosicao,
+                  nomeFilter: nomeFilter,
+                  validadeFilter: validadeFilter,
+                  onCategoriaChanged: (value) =>
+                      setState(() => selectedCategoria = value),
+                  onPosicaoChanged: (value) =>
+                      setState(() => selectedPosicao = value),
+                  onNomeChanged: (value) => setState(() => nomeFilter = value),
+                  onValidadeChanged: (value) =>
+                      setState(() => validadeFilter = value),
+                  isTablet: isTablet,
+                ),
+
+
+                const SizedBox(height: 20),
+
+                SizedBox(
+                  height: 600,
+                  child: ProductsTable(produtos: filteredProducts),
+                ),
 
                 const SizedBox(height: 20),
               ],

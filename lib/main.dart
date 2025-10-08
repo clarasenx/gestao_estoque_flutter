@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/views/login/login_page.dart';
 
 void main() {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
