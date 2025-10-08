@@ -1,17 +1,27 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
+import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 
 class ProductsTable extends StatelessWidget {
-  final List<Produto> produtos; // recebe os produtos filtrados
 
-  const ProductsTable({super.key, required this.produtos});
+  const ProductsTable({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: PaginatedDataTable2(
-        columnSpacing: 12,
+    final controller = Get.put(ProductsController());
+    return Obx(() {
+      if (controller.isLoading.value) {
+        return const Center(child: CircularProgressIndicator());
+      }
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        child: Center(
+          child: PaginatedDataTable2(
+            autoRowsToHeight: true,
+            columnSpacing: 12,
         minWidth: 786,
         dividerThickness: 0,
         horizontalMargin: 12,
@@ -24,37 +34,48 @@ class ProductsTable extends StatelessWidget {
             topRight: Radius.circular(12),
           ),
         ),
-        columns: const [
-          DataColumn2(label: Text("Nome"), size: ColumnSize.L),
-          DataColumn2(label: Text("Descrição")),
-          DataColumn2(label: Text("Categoria")),
-          DataColumn2(label: Text("Validade")),
-          DataColumn2(label: Text("Posição")),
-          DataColumn2(label: Text("Estoque")),
-        ],
-        source: ProductData(produtos), // passa os produtos
-      ),
-    );
+            columns: [
+              DataColumn2(label: Text("Nome")),
+              DataColumn2(label: Text("Descrição")),
+              DataColumn2(label: Text("Category")),
+              DataColumn2(label: Text("Local")),
+              DataColumn2(label: Text("Qtd. Estoque")),
+              DataColumn2(label: Text("Validade")),
+            ],
+            source: ProductData(controller.products),
+          ),
+        ),
+      );
+    });
   }
 }
 
 class ProductData extends DataTableSource {
-  final List<Produto> produtos;
+  final List<Product> products;
 
-  ProductData(this.produtos);
+  ProductData(this.products);
 
   @override
   DataRow? getRow(int index) {
-    final produto = produtos[index];
+    if (index >= products.length) return null;
+
+    final product = products[index];
+
     return DataRow2(
-      cells: [
-        DataCell(Text(produto.nome)),
-        DataCell(Text(produto.descricao)),
-        DataCell(Text(produto.categoria)),
-        DataCell(Text(produto.dataValidade)),
-        DataCell(Text(produto.posicao)),
-        DataCell(Text(produto.estoque.toString())),
-      ],
+      cells: ([
+        DataCell(Text(product.name)),
+        DataCell(Text(product.description ?? '')),
+        DataCell(Text(product.categoryId.toString())),
+        DataCell(Text(product.locationId.toString())),
+        DataCell(Text(product.currentStock.toString())),
+        DataCell(
+          Text(
+            product.expirationDate != null
+                ? DateFormat('dd/MM/yyyy').format(product.expirationDate!)
+                : 'Indefinido',
+          ),
+        ),
+      ]),
     );
   }
 
@@ -62,8 +83,36 @@ class ProductData extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => produtos.length;
+  int get rowCount => products.length;
 
   @override
   int get selectedRowCount => 0;
+}
+
+class ProductsController extends GetxController {
+  var products = <Product>[].obs;
+  final isLoading = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchProducts();
+  }
+
+  Future<void> fetchProducts() async {
+    try {
+      isLoading.value = true;
+      final dio = ApiService().dio;
+      final response = await dio.get('/product');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        products.value = data.map((e) => Product.fromJson(e)).toList();
+      }
+    } catch (e) {
+      print("Erro ao buscar produtos: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 }

@@ -2,39 +2,40 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 
 class FilterDatabase extends StatelessWidget {
-  final List<Produto> produtos;
+  final List<Product> produtos;
 
-  final String? selectedCategoria;
-  final String? selectedPosicao;
-  final String? nomeFilter;
-  final String? validadeFilter;
+  final int? selectedCategory;
+  final int? selectedLocation;
+  final String? nameFilter;
+  final String? expirationFilter;
   final bool isTablet;
 
-  final ValueChanged<String?> onCategoriaChanged;
-  final ValueChanged<String?> onPosicaoChanged;
-  final ValueChanged<String> onNomeChanged;
-  final ValueChanged<String> onValidadeChanged;
+  final ValueChanged<int?> onCategoryChanged;
+  final ValueChanged<int?> onLocationChanged;
+  final ValueChanged<String> onNameChanged;
+  final ValueChanged<String> onExpirationChanged;
 
   const FilterDatabase({
     super.key,
     required this.produtos,
-    required this.selectedCategoria,
-    required this.selectedPosicao,
-    required this.nomeFilter,
-    required this.validadeFilter,
-    required this.onCategoriaChanged,
-    required this.onPosicaoChanged,
-    required this.onNomeChanged,
-    required this.onValidadeChanged,
+    required this.selectedCategory,
+    required this.selectedLocation,
+    required this.nameFilter,
+    required this.expirationFilter,
+    required this.onCategoryChanged,
+    required this.onLocationChanged,
+    required this.onNameChanged,
+    required this.onExpirationChanged,
     required this.isTablet,
   });
 
   @override
   Widget build(BuildContext context) {
-    final categorias =
-        ['Todos'] + produtos.map((p) => p.categoria).toSet().toList();
-    final posicoes =
-        ['Todos'] + produtos.map((p) => p.posicao).toSet().toList();
+    final categories = produtos.map((p) => p.categoryId).toSet().toList();
+    final locations = produtos.map((p) => p.locationId).toSet().toList();
+
+    print(categories);
+    print(locations);
 
     return GridView.count(
       shrinkWrap: true,
@@ -50,8 +51,8 @@ class FilterDatabase extends StatelessWidget {
             labelText: 'Nome',
             border: OutlineInputBorder(),
           ),
-          initialValue: nomeFilter,
-          onChanged: onNomeChanged,
+          initialValue: nameFilter,
+          onChanged: onNameChanged,
         ),
 
         // Validade
@@ -60,33 +61,33 @@ class FilterDatabase extends StatelessWidget {
             labelText: 'Validade',
             border: OutlineInputBorder(),
           ),
-          initialValue: validadeFilter,
-          onChanged: onValidadeChanged,
+          initialValue: expirationFilter,
+          onChanged: onExpirationChanged,
         ),
-        // Categoria
-        DropdownButtonFormField<String>(
+        // Category
+        DropdownButtonFormField<int>(
           decoration: const InputDecoration(
-            labelText: 'Categoria',
+            labelText: 'Category',
             border: OutlineInputBorder(),
           ),
-          initialValue: selectedCategoria ?? 'Todos',
-          items: categorias
-              .map((cat) => DropdownMenuItem(value: cat, child: Text(cat)))
+          initialValue: selectedCategory ?? 0,
+          items: categories
+              .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.toString())))
               .toList(),
-          onChanged: onCategoriaChanged,
+          onChanged: onCategoryChanged,
         ),
 
         // Posição
-        DropdownButtonFormField<String>(
+        DropdownButtonFormField<int>(
           decoration: const InputDecoration(
             labelText: 'Posição',
             border: OutlineInputBorder(),
           ),
-          initialValue: selectedPosicao ?? 'Todos',
-          items: posicoes
-              .map((pos) => DropdownMenuItem(value: pos, child: Text(pos)))
+          initialValue: selectedLocation ?? 0,
+          items: locations
+              .map((pos) => DropdownMenuItem(value: pos, child: Text(pos.toString())))
               .toList(),
-          onChanged: onPosicaoChanged,
+          onChanged: onLocationChanged,
         ),
       ],
     );
