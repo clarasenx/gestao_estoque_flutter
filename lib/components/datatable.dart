@@ -6,7 +6,6 @@ import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ProductsTable extends StatelessWidget {
-
   const ProductsTable({super.key});
 
   @override
@@ -22,23 +21,25 @@ class ProductsTable extends StatelessWidget {
           child: PaginatedDataTable2(
             autoRowsToHeight: true,
             columnSpacing: 12,
-        minWidth: 786,
-        dividerThickness: 0,
-        horizontalMargin: 12,
-        dataRowHeight: 56,
-        headingTextStyle: Theme.of(context).textTheme.titleMedium?.copyWith(color: Colors.white,),
-        headingRowColor: WidgetStatePropertyAll(Colors.blueAccent),
-        headingRowDecoration: const BoxDecoration(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(12),
-            topRight: Radius.circular(12),
-          ),
-        ),
+            minWidth: 786,
+            dividerThickness: 0,
+            horizontalMargin: 12,
+            dataRowHeight: 56,
+            headingTextStyle: Theme.of(
+              context,
+            ).textTheme.titleMedium?.copyWith(color: Colors.white),
+            headingRowColor: WidgetStatePropertyAll(Colors.blueAccent),
+            headingRowDecoration: const BoxDecoration(
+              borderRadius: BorderRadius.only(
+                topLeft: Radius.circular(12),
+                topRight: Radius.circular(12),
+              ),
+            ),
             columns: [
               DataColumn2(label: Text("Nome")),
               DataColumn2(label: Text("Descrição")),
               DataColumn2(label: Text("Category")),
-              DataColumn2(label: Text("Local")),
+              //DataColumn2(label: Text("Local")),
               DataColumn2(label: Text("Qtd. Estoque")),
               DataColumn2(label: Text("Validade")),
             ],
@@ -65,8 +66,8 @@ class ProductData extends DataTableSource {
       cells: ([
         DataCell(Text(product.name)),
         DataCell(Text(product.description ?? '')),
-        DataCell(Text(product.categoryId.toString())),
-        DataCell(Text(product.locationId.toString())),
+        DataCell(Text(product.category?.name.toString() ?? "")),
+        //DataCell(Text(product.locationId.toString())),
         DataCell(Text(product.currentStock.toString())),
         DataCell(
           Text(

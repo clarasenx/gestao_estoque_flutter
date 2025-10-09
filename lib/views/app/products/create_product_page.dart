@@ -64,7 +64,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
       name: nameController.text,
       description: descriptionController.text,
       categoryId: _selectedCategory!.id,
-      locationId: _selectedLocation!.id,
       currentStock: 0,
     );
     await dio.post('/product', data: product.toJson());
@@ -175,7 +174,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                           ),
                         ),
                       ),
-                      Expanded(
+                      /* Expanded(
                         child: Padding(
                           padding: EdgeInsetsGeometry.all(10),
                           child: DropdownButtonFormField<Location>(
@@ -207,7 +206,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                             },
                           ),
                         ),
-                      ),
+                      ), */
                     ],
                   ),
                 ],
@@ -221,7 +220,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
         child: FilledButton(
           onPressed: () async {
             if (_formKey.currentState!.validate() &&
-                _selectedLocation != null &&
                 _selectedCategory != null) {
               await createProduct();
               Navigator.pop(context);

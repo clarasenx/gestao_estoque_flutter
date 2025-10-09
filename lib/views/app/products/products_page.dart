@@ -3,7 +3,6 @@ import 'package:gestao_estoque_flutter/components/datatable.dart';
 import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
-import 'package:get/get.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -33,7 +32,6 @@ class _ProductPageState extends State<ProductPage> {
       categoryId: i,
       currentStock: i,
       expirationDate: DateTime.now(),
-      locationId: i,
       id: i,
     ),
   );

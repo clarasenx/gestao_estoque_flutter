@@ -32,10 +32,10 @@ class FilterDatabase extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final categories = produtos.map((p) => p.categoryId).toSet().toList();
-    final locations = produtos.map((p) => p.locationId).toSet().toList();
+    // final locations = produtos.map((p) => p.locationId).toSet().toList();
 
     print(categories);
-    print(locations);
+    // print(locations);
 
     return GridView.count(
       shrinkWrap: true,
@@ -72,13 +72,16 @@ class FilterDatabase extends StatelessWidget {
           ),
           initialValue: selectedCategory ?? 0,
           items: categories
-              .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.toString())))
+              .map(
+                (cat) =>
+                    DropdownMenuItem(value: cat, child: Text(cat.toString())),
+              )
               .toList(),
           onChanged: onCategoryChanged,
         ),
 
         // Posição
-        DropdownButtonFormField<int>(
+        /* DropdownButtonFormField<int>(
           decoration: const InputDecoration(
             labelText: 'Posição',
             border: OutlineInputBorder(),
@@ -88,7 +91,7 @@ class FilterDatabase extends StatelessWidget {
               .map((pos) => DropdownMenuItem(value: pos, child: Text(pos.toString())))
               .toList(),
           onChanged: onLocationChanged,
-        ),
+        ), */
       ],
     );
   }

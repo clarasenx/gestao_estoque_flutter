@@ -5,7 +5,6 @@ class Product {
   final String name;
   final String? description;
   final int categoryId;
-  final int locationId;
   final int currentStock;
   final DateTime? expirationDate;
   final DateTime? createdAt;
@@ -20,7 +19,6 @@ class Product {
     this.description,
     required this.categoryId,
     this.category,
-    required this.locationId,
     required this.currentStock,
     this.expirationDate,
     this.createdAt,
@@ -37,8 +35,9 @@ class Product {
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
-      locationId: json['locationId'] as int,
-      currentStock: json['currentStock'] != null ? json['currentStock'] as int : 0,
+      currentStock: json['currentStock'] != null
+          ? json['currentStock'] as int
+          : 0,
       expirationDate: json['expirationDate'] != null
           ? DateTime.parse(json['expirationDate'] as String)
           : null,
@@ -59,7 +58,6 @@ class Product {
       'name': name,
       'description': description,
       'categoryId': categoryId,
-      'locationId': locationId,
       'currentStock': currentStock,
     };
     if (expirationDate != null) {
