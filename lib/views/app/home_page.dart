@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
+import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
 
 class DrawerItem {
   final Widget page;
@@ -30,6 +31,10 @@ class _HomePageState extends State<HomePage> {
     DrawerItem(
       page: Text('Movimentações', style: optionStyle),
       title: 'Movimentações',
+    ),
+    DrawerItem(
+      page: UserPage(name: 'leonardo', cpf: '000.000.000-00', role: 'ADMIN', password: 'password'),
+      title: 'Meu Perfil',
     ),
   ];
 

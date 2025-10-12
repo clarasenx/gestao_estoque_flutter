@@ -38,7 +38,6 @@ class ProductsTable extends StatelessWidget {
               DataColumn2(label: Text("Nome")),
               DataColumn2(label: Text("Descrição")),
               DataColumn2(label: Text("Category")),
-              DataColumn2(label: Text("Local")),
               DataColumn2(label: Text("Qtd. Estoque")),
               DataColumn2(label: Text("Validade")),
             ],
@@ -66,7 +65,6 @@ class ProductData extends DataTableSource {
         DataCell(Text(product.name)),
         DataCell(Text(product.description ?? '')),
         DataCell(Text(product.categoryId.toString())),
-        DataCell(Text(product.locationId.toString())),
         DataCell(Text(product.currentStock.toString())),
         DataCell(
           Text(
@@ -107,6 +105,7 @@ class ProductsController extends GetxController {
 
       if (response.statusCode == 200) {
         final List<dynamic> data = response.data;
+        print(data);
         products.value = data.map((e) => Product.fromJson(e)).toList();
       }
     } catch (e) {

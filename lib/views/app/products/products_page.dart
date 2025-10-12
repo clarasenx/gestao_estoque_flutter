@@ -33,7 +33,6 @@ class _ProductPageState extends State<ProductPage> {
       categoryId: i,
       currentStock: i,
       expirationDate: DateTime.now(),
-      locationId: i,
       id: i,
     ),
   );
