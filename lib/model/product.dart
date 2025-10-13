@@ -35,7 +35,9 @@ class Product {
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
-      currentStock: json['currentStock'] != null ? json['currentStock'] as int : 0,
+      currentStock: json['currentStock'] != null
+          ? json['currentStock'] as int
+          : 0,
       expirationDate: json['expirationDate'] != null
           ? DateTime.parse(json['expirationDate'] as String)
           : null,

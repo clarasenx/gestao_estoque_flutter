@@ -70,11 +70,13 @@ class FilterDatabase extends StatelessWidget {
           ),
           initialValue: selectedCategory ?? 0,
           items: categories
-              .map((cat) => DropdownMenuItem(value: cat, child: Text(cat.toString())))
+              .map(
+                (cat) =>
+                    DropdownMenuItem(value: cat, child: Text(cat.toString())),
+              )
               .toList(),
           onChanged: onCategoryChanged,
         ),
-
       ],
     );
   }
