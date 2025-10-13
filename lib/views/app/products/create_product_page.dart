@@ -190,7 +190,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                           ),
                         ),
                       ),
-                      /* Expanded(
+                       Expanded(
                         child: Padding(
                           padding: EdgeInsetsGeometry.all(10),
                           child: TextFormField(
@@ -221,7 +221,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                             onTap: () => _selectDate(context),
                           ),
                         ),
-                      ), */
+                      ),
                     ],
                   ),
                 ],
