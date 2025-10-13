@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
+import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
 
@@ -26,14 +27,15 @@ class _ProductPageState extends State<ProductPage> {
 
   List<Product> produtos = List.generate(
     10,
-    (i) => Product(
-      name: 'Produto ${i + 1}',
-      description: 'Descrição ${i + 1}',
-      categoryId: i,
-      currentStock: i,
-      expirationDate: DateTime.now(),
-      id: i,
-    ),
+        (i) =>
+        Product(
+          name: 'Produto ${i + 1}',
+          description: 'Descrição ${i + 1}',
+          categoryId: i,
+          currentStock: i,
+          expirationDate: DateTime.now(),
+          id: i,
+        ),
   );
 
   int? selectedCategory = 0;
@@ -53,29 +55,19 @@ class _ProductPageState extends State<ProductPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               // KPIs em Grid
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    'Produtos',
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                  ),
-                  ElevatedButton.icon(
-                    icon: Icon(Icons.add),
-                    label: Text("Adicionar Produto"),
-                    onPressed: () async {
-                      await Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => CreateProductPage(),
-                        ),
-                      );
-                    },
-                  ),
-                ],
+              Header(
+                title: "Produtos",
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateProductPage(),
+                    ),
+                  );
+                },
               ),
 
-              const SizedBox(height: 20),
+
 
               FilterDatabase(
                 produtos: produtos,

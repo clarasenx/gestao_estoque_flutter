@@ -21,6 +21,8 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final _dateController = TextEditingController();
   final _descriptionController = TextEditingController();
 
+  bool isLoading = false;
+
   @override
   void initState() {
     super.initState();
@@ -29,6 +31,9 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
   Future<List<Category>> getCategories() async {
     try {
+      setState(() {
+        isLoading = true;
+      });
       final dio = ApiService().dio;
 
       // duas requisições paralelas
@@ -44,10 +49,17 @@ class _CreateProductPageState extends State<CreateProductPage> {
     } catch (err) {
       print(err);
       throw err;
+    } finally {
+      setState(() {
+        isLoading = false;
+      });
     }
   }
 
   Future<void> createProduct() async {
+    setState(() {
+      isLoading = true;
+    });
     final dio = ApiService().dio;
 
     final bool hasExpirationDate = _dateController.text.isNotEmpty;
@@ -69,6 +81,10 @@ class _CreateProductPageState extends State<CreateProductPage> {
           : null,
     );
     await dio.post('/product', data: product.toJson());
+
+    setState(() {
+      isLoading = false;
+    });
 
     Get.find<ProductsController>().fetchProducts();
   }
@@ -233,24 +249,33 @@ class _CreateProductPageState extends State<CreateProductPage> {
       bottomNavigationBar: Padding(
         padding: const EdgeInsets.all(16.0),
         child: FilledButton(
-          onPressed: () async {
-            if (_formKey.currentState!.validate() &&
-                _selectedCategory != null) {
-              await createProduct();
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Preencha o formulário corretamente!"),
+          onPressed: isLoading
+              ? null
+              : () async {
+                  if (_formKey.currentState!.validate()) {
+                    await createProduct();
+                    Navigator.pop(context);
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Preencha o formulário corretamente!"),
+                      ),
+                    );
+                  }
+                },
+          child: isLoading
+              ? const SizedBox(
+                  height: 20, // altura do indicador
+                  width: 20, // largura do indicador
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2, // opcional, deixa mais fino
+                  ),
+                )
+              : const SizedBox(
+                  height: 40,
+                  width: double.infinity,
+                  child: Center(child: Text("Salvar")),
                 ),
-              );
-            }
-          },
-          child: const SizedBox(
-            height: 40,
-            width: double.infinity,
-            child: Center(child: Text("Salvar")),
-          ),
         ),
       ),
     );

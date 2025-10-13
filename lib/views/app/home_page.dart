@@ -3,6 +3,7 @@ import 'package:gestao_estoque_flutter/views/app/category/category_page.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
+import 'package:gestao_estoque_flutter/views/app/warehouse/warehouses_page.dart';
 
 class DrawerItem {
   final Widget page;
@@ -35,9 +36,15 @@ class _HomePageState extends State<HomePage> {
       title: 'Movimentações',
     ),
     DrawerItem(
-      page: UserPage(name: 'leonardo', cpf: '000.000.000-00', role: 'ADMIN', password: 'password'),
+      page: UserPage(
+        name: 'leonardo',
+        cpf: '000.000.000-00',
+        role: 'ADMIN',
+        password: 'password',
+      ),
       title: 'Meu Perfil',
     ),
+    DrawerItem(page: WarehousePage(), title: 'Depósitos'),
   ];
 
   void _onItemTapped(int index) {
@@ -51,7 +58,10 @@ class _HomePageState extends State<HomePage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.blueAccent,
-        title: Text(_drawerItems[_selectedIndex].title, style: TextStyle(color: Colors.white),),
+        title: Text(
+          _drawerItems[_selectedIndex].title,
+          style: TextStyle(color: Colors.white),
+        ),
         leading: Builder(
           builder: (context) => IconButton(
             onPressed: () => Scaffold.of(context).openDrawer(),
@@ -59,7 +69,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      body: _drawerItems[_selectedIndex].page,
+      body: SafeArea(child: _drawerItems[_selectedIndex].page),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -71,7 +81,11 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                   child: Text(
                     'Moreno Festas - Estoque',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 20,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
