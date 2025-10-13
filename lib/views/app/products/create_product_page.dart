@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gestao_estoque_flutter/components/datatable.dart';
+import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
@@ -190,7 +190,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                           ),
                         ),
                       ),
-                       Expanded(
+                      Expanded(
                         child: Padding(
                           padding: EdgeInsetsGeometry.all(10),
                           child: TextFormField(

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gestao_estoque_flutter/components/datatable.dart';
+import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';

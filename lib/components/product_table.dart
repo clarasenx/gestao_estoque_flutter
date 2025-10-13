@@ -1,5 +1,6 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/model/Category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:get/get.dart';
@@ -111,6 +112,35 @@ class ProductsController extends GetxController {
       }
     } catch (e) {
       print("Erro ao buscar produtos: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
+}
+
+class CategoryController extends GetxController {
+  var categories = <Category>[].obs;
+  final isLoading = true.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchCategories();
+  }
+
+  Future<void> fetchCategories() async {
+    try {
+      isLoading.value = true;
+      final dio = ApiService().dio;
+      final response = await dio.get('/category');
+
+      if (response.statusCode == 200) {
+        final List<dynamic> data = response.data;
+        print(data);
+        categories.value = data.map((e) => Category.fromJson(e)).toList();
+      }
+    } catch (e) {
+      print("Erro ao buscar categorias: $e");
     } finally {
       isLoading.value = false;
     }

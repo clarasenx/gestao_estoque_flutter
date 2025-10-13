@@ -27,6 +27,9 @@ class Category {
     return {
       'id': id,
       'name': name,
+      'createdAt': createdAt,
+      'updatedAt': updatedAt,
+      'deletedAt': deletedAt
     };
   }
 }

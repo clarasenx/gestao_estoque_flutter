@@ -1,8 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:gestao_estoque_flutter/components/datatable.dart';
-import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
-import 'package:gestao_estoque_flutter/model/product.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

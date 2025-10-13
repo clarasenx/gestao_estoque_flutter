@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/views/app/category/category_page.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
@@ -28,6 +29,7 @@ class _HomePageState extends State<HomePage> {
   static const List<DrawerItem> _drawerItems = <DrawerItem>[
     DrawerItem(page: DashboardPage(), title: 'Painel'),
     DrawerItem(page: ProductPage(), title: 'Produtos'),
+    DrawerItem(page: CategoryPage(), title: 'Categorias'),
     DrawerItem(
       page: Text('Movimentações', style: optionStyle),
       title: 'Movimentações',
@@ -48,11 +50,12 @@ class _HomePageState extends State<HomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(_drawerItems[_selectedIndex].title),
+        backgroundColor: Colors.blueAccent,
+        title: Text(_drawerItems[_selectedIndex].title, style: TextStyle(color: Colors.white),),
         leading: Builder(
           builder: (context) => IconButton(
             onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const Icon(Icons.menu),
+            icon: const Icon(Icons.menu, color: Colors.white),
           ),
         ),
       ),
@@ -64,7 +67,7 @@ class _HomePageState extends State<HomePage> {
             const SizedBox(
               height: 100,
               child: DrawerHeader(
-                decoration: BoxDecoration(color: Colors.blue),
+                decoration: BoxDecoration(color: Colors.blueAccent),
                 child: Center(
                   child: Text(
                     'Moreno Festas - Estoque',
