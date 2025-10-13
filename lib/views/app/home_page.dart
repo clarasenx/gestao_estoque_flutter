@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
+import 'package:gestao_estoque_flutter/views/app/warehouse/warehouses_page.dart';
 
 class DrawerItem {
   final Widget page;
@@ -33,8 +34,15 @@ class _HomePageState extends State<HomePage> {
       title: 'Movimentações',
     ),
     DrawerItem(
-      page: UserPage(name: 'leonardo', cpf: '000.000.000-00', role: 'ADMIN', password: 'password'),
+      page: UserPage(name: 'leonardo',
+          cpf: '000.000.000-00',
+          role: 'ADMIN',
+          password: 'password'),
       title: 'Meu Perfil',
+    ),
+    DrawerItem(
+      page: WarehousePage(),
+      title: 'Depósitos',
     ),
   ];
 
@@ -50,13 +58,16 @@ class _HomePageState extends State<HomePage> {
       appBar: AppBar(
         title: Text(_drawerItems[_selectedIndex].title),
         leading: Builder(
-          builder: (context) => IconButton(
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const Icon(Icons.menu),
-          ),
+          builder: (context) =>
+              IconButton(
+                onPressed: () => Scaffold.of(context).openDrawer(),
+                icon: const Icon(Icons.menu),
+              ),
         ),
       ),
-      body: _drawerItems[_selectedIndex].page,
+      body: SafeArea(
+          child: _drawerItems[_selectedIndex].page
+      ),
       drawer: Drawer(
         child: ListView(
           padding: EdgeInsets.zero,
@@ -73,7 +84,10 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            ..._drawerItems.asMap().entries.map((entry) {
+            ..._drawerItems
+                .asMap()
+                .entries
+                .map((entry) {
               final index = entry.key;
               final item = entry.value;
               return ListTile(
