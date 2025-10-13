@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                 child: Center(
                   child: Text(
                     'Moreno Festas - Estoque',
-                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20, color: Colors.white),
                   ),
                 ),
               ),

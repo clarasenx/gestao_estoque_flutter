@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 
 class UserPage extends StatelessWidget {
   final String name;
@@ -20,7 +21,6 @@ class UserPage extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          // 🔵 Cabeçalho azul com informações principais
           Container(
             width: double.infinity,
             color: Colors.blueAccent,
@@ -49,10 +49,10 @@ class UserPage extends StatelessWidget {
             ),
           ),
 
-          // ⚪ Conteúdo principal (branco)
+          // Conteúdo principal
           Expanded(
             child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.only(left: 48, right: 48, top: 32, bottom: 32),
               child: Center(
                 child: Card(
                   elevation: 4,
@@ -81,27 +81,18 @@ class UserPage extends StatelessWidget {
                         const SizedBox(height: 12),
                         _buildInfoRow('Senha', '********'),
                         const SizedBox(height: 32),
-                        ElevatedButton.icon(
-                          onPressed: () {
+                        
+                        AppButton(
+                          text: 'Editar Perfil', 
+                          icon: Icons.edit,
+                          onPressed: () { 
                             ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
                                 content: Text('Editar perfil em breve!'),
                               ),
                             );
-                          },
-                          icon: const Icon(Icons.edit, color: Colors.white,),
-                          label: const Text('Editar Perfil', style: TextStyle(color: Colors.white),),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blueAccent,
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 32,
-                              vertical: 12,
-                            ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                        ),
+                          }
+                        )
                       ],
                     ),
                   ),
@@ -119,13 +110,7 @@ class UserPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         Text('$label:', style: const TextStyle(fontWeight: FontWeight.w600)),
-        Flexible(
-          child: Text(
-            value,
-            textAlign: TextAlign.end,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
+        Text(value, textAlign: TextAlign.center, overflow: TextOverflow.ellipsis, ),
       ],
     );
   }
