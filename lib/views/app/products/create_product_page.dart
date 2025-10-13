@@ -1,17 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/datatable.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
-import 'package:gestao_estoque_flutter/model/location.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:get/get.dart';
-
-class DataResult {
-  final List<Category> categories;
-  final List<Location> locations;
-
-  DataResult({required this.categories, required this.locations});
-}
 
 class CreateProductPage extends StatefulWidget {
   const CreateProductPage({super.key});
@@ -21,54 +13,80 @@ class CreateProductPage extends StatefulWidget {
 }
 
 class _CreateProductPageState extends State<CreateProductPage> {
-  late Future<DataResult> _dataFuture;
+  late Future<List<Category>> _dataFuture;
   Category? _selectedCategory;
-  Location? _selectedLocation;
 
   final _formKey = GlobalKey<FormState>();
-  final nameController = TextEditingController();
-  final descriptionController = TextEditingController();
-  final locationIdController = TextEditingController();
-  final categoryIdController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _dateController = TextEditingController();
+  final _descriptionController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _dataFuture = getAllData();
+    _dataFuture = getCategories();
   }
 
-  Future<DataResult> getAllData() async {
-    final dio = ApiService().dio;
+  Future<List<Category>> getCategories() async {
+    try {
+      final dio = ApiService().dio;
 
-    // duas requisições paralelas
-    final responses = await Future.wait([
-      dio.get('/category'),
-      dio.get('/location'),
-    ]);
+      // duas requisições paralelas
+      final response = await dio.get('/category');
 
-    final categories = (responses[0].data as List)
-        .map((c) => Category.fromJson(c))
-        .toList();
+      final data = response.data;
 
-    final locations = (responses[1].data as List)
-        .map((l) => Location.fromJson(l))
-        .toList();
+      final List<Category> categories = (data is List)
+          ? data.map((c) => Category.fromJson(c)).toList()
+          : [];
 
-    return DataResult(categories: categories, locations: locations);
+      return categories;
+    } catch (err) {
+      print(err);
+      throw err;
+    }
   }
 
   Future<void> createProduct() async {
     final dio = ApiService().dio;
+
+    final bool hasExpirationDate = _dateController.text.isNotEmpty;
+
+    final parts = _dateController.text.split('/'); // ['10', '10', '2025']
+
     final product = Product(
       id: 0,
-      name: nameController.text,
-      description: descriptionController.text,
+      name: _nameController.text,
+      description: _descriptionController.text,
       categoryId: _selectedCategory!.id,
       currentStock: 0,
+      expirationDate: hasExpirationDate
+          ? DateTime(
+              int.parse(parts[2]), // ano
+              int.parse(parts[1]), // mês
+              int.parse(parts[0]), // dia
+            )
+          : null,
     );
     await dio.post('/product', data: product.toJson());
 
     Get.find<ProductsController>().fetchProducts();
+  }
+
+  Future<void> _selectDate(BuildContext context) async {
+    final DateTime? pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(), // data inicial
+      firstDate: DateTime(2000), // data mínima
+      lastDate: DateTime(DateTime.now().year + 10), // até 10 anos no futuro
+    );
+
+    if (pickedDate != null) {
+      setState(() {
+        _dateController.text =
+            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+      });
+    }
   }
 
   @override
@@ -98,8 +116,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
             return Center(child: Text("Nenhuma categoria encontrada"));
           }
 
-          final categories = asyncSnapshot.data!.categories;
-          final locations = asyncSnapshot.data!.locations;
+          final categories = asyncSnapshot.data!;
 
           return Form(
             key: _formKey,
@@ -110,7 +127,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                   Padding(
                     padding: EdgeInsetsGeometry.all(10),
                     child: TextFormField(
-                      controller: nameController,
+                      controller: _nameController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: "Digite o nome do produto",
@@ -129,7 +146,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                   Padding(
                     padding: EdgeInsetsGeometry.all(10),
                     child: TextFormField(
-                      controller: descriptionController,
+                      controller: _descriptionController,
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: "Digite a descrição do produto",
@@ -141,7 +158,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
                     ),
                   ),
                   Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
                       Expanded(
                         child: Padding(
@@ -162,7 +178,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                               });
                             },
                             decoration: InputDecoration(
-                              labelText: "Category",
+                              labelText: "Categoria",
                               border: OutlineInputBorder(),
                             ),
                             validator: (value) {
@@ -177,33 +193,32 @@ class _CreateProductPageState extends State<CreateProductPage> {
                       /* Expanded(
                         child: Padding(
                           padding: EdgeInsetsGeometry.all(10),
-                          child: DropdownButtonFormField<Location>(
-                            initialValue: _selectedLocation,
-                            items: locations
-                                .map(
-                                  (location) => DropdownMenuItem(
-                                    value: location,
-                                    child: Text(
-                                      '${location.shelf} - ${location.side}',
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                            onChanged: (category) {
-                              setState(() {
-                                _selectedLocation = category;
-                              });
-                            },
+                          child: TextFormField(
+                            controller: _dateController,
+                            readOnly: true, // impede digitação manual
                             decoration: InputDecoration(
-                              labelText: "Local",
+                              labelText: "Data de Vencimento",
                               border: OutlineInputBorder(),
+                              suffixIcon: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  if (_dateController.text.isNotEmpty)
+                                    IconButton(
+                                      icon: Icon(Icons.clear),
+                                      onPressed: () {
+                                        setState(() {
+                                          _dateController.clear();
+                                        });
+                                      },
+                                    ),
+                                  IconButton(
+                                    icon: Icon(Icons.calendar_today),
+                                    onPressed: () => _selectDate(context),
+                                  ),
+                                ],
+                              ),
                             ),
-                            validator: (value) {
-                              if (value == null) {
-                                return "Selecione um local";
-                              }
-                              return null;
-                            },
+                            onTap: () => _selectDate(context),
                           ),
                         ),
                       ), */
