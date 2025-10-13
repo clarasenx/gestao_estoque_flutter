@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
@@ -21,7 +22,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final _dateController = TextEditingController();
   final _descriptionController = TextEditingController();
 
-  bool isLoading = false;
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -32,7 +33,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   Future<List<Category>> getCategories() async {
     try {
       setState(() {
-        isLoading = true;
+        _isLoading = true;
       });
       final dio = ApiService().dio;
 
@@ -51,14 +52,14 @@ class _CreateProductPageState extends State<CreateProductPage> {
       throw err;
     } finally {
       setState(() {
-        isLoading = false;
+        _isLoading = false;
       });
     }
   }
 
   Future<void> createProduct() async {
     setState(() {
-      isLoading = true;
+      _isLoading = true;
     });
     final dio = ApiService().dio;
 
@@ -83,7 +84,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
     await dio.post('/product', data: product.toJson());
 
     setState(() {
-      isLoading = false;
+      _isLoading = false;
     });
 
     Get.find<ProductsController>().fetchProducts();
@@ -213,7 +214,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                             controller: _dateController,
                             readOnly: true, // impede digitação manual
                             decoration: InputDecoration(
-                              labelText: "Data de Vencimento",
+                              labelText: "Data de Validade",
                               border: OutlineInputBorder(),
                               suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -246,38 +247,22 @@ class _CreateProductPageState extends State<CreateProductPage> {
           );
         },
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FilledButton(
-          onPressed: isLoading
-              ? null
-              : () async {
-                  if (_formKey.currentState!.validate()) {
-                    await createProduct();
-                    Navigator.pop(context);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Preencha o formulário corretamente!"),
-                      ),
-                    );
-                  }
-                },
-          child: isLoading
-              ? const SizedBox(
-                  height: 20, // altura do indicador
-                  width: 20, // largura do indicador
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2, // opcional, deixa mais fino
-                  ),
-                )
-              : const SizedBox(
-                  height: 40,
-                  width: double.infinity,
-                  child: Center(child: Text("Salvar")),
-                ),
-        ),
+      bottomNavigationBar: FormButton(
+        isLoading: _isLoading,
+        onPressed: () async {
+          if (_formKey.currentState!.validate() && _selectedCategory != null) {
+            await createProduct();
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Preencha o formulário corretamente!"),
+              ),
+            );
+          }
+        },
       ),
+
     );
   }
 }

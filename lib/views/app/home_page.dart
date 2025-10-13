@@ -95,7 +95,10 @@ class _HomePageState extends State<HomePage> {
               final item = entry.value;
               return ListTile(
                 selected: _selectedIndex == index,
-                title: Text(item.title),
+                title: Text(
+                  item.title,
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+                ),
                 onTap: () {
                   _onItemTapped(index);
                   Navigator.pop(context);

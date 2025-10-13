@@ -67,8 +67,6 @@ class _ProductPageState extends State<ProductPage> {
                 },
               ),
 
-
-
               FilterDatabase(
                 produtos: produtos,
                 selectedCategory: selectedCategory,

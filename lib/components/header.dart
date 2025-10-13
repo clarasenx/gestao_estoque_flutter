@@ -10,6 +10,7 @@ class Header extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -17,10 +18,17 @@ class Header extends StatelessWidget {
               title,
               style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
             ),
-            ElevatedButton.icon(
+            FilledButton.icon(
               icon: Icon(Icons.add),
               label: Text("Adicionar"),
               onPressed: onPressed,
+              style: FilledButton.styleFrom(
+                backgroundColor: Colors.blueAccent, // cor de fundo
+                padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(8),
+                ),
+              ),
             ),
           ],
         ),

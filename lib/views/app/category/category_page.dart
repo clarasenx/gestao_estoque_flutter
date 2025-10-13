@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/category_card.dart';
+import 'package:gestao_estoque_flutter/components/header.dart';
+import 'package:gestao_estoque_flutter/views/app/category/create_category_page.dart';
 
 class CategoryPage extends StatefulWidget {
   const CategoryPage({super.key});
@@ -27,6 +29,17 @@ class _CategoryPageState extends State<CategoryPage> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
+              Header(
+                title: "Categoria",
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateCategoryPage(),
+                    ),
+                  );
+                },
+              ),
               GridView.count(
                 crossAxisCount: isTablet ? 2 : 1,
                 childAspectRatio: isTablet ? 3 : 2.8,

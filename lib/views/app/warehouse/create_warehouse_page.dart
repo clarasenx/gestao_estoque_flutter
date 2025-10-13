@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 
@@ -13,11 +14,11 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
-  bool isLoading = false;
+  bool _isLoading = false;
 
   Future<void> createWarehouse() async {
     setState(() {
-      isLoading = true;
+      _isLoading = true;
     });
 
     final dio = ApiService().dio;
@@ -30,7 +31,7 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
     await dio.post('/warehouse', data: warehouse.toJson());
 
     setState(() {
-      isLoading = false;
+      _isLoading = false;
     });
   }
 
@@ -93,37 +94,20 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FilledButton(
-          onPressed: isLoading
-              ? null
-              : () async {
-                  if (_formKey.currentState!.validate()) {
-                    await createWarehouse();
-                    Navigator.pop(context);
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text("Preencha o formulário corretamente!"),
-                      ),
-                    );
-                  }
-                },
-          child: isLoading
-              ? const SizedBox(
-                  height: 20, // altura do indicador
-                  width: 20, // largura do indicador
-                  child: CircularProgressIndicator(
-                    strokeWidth: 2, // opcional, deixa mais fino
-                  ),
-                )
-              : const SizedBox(
-                  height: 40,
-                  width: double.infinity,
-                  child: Center(child: Text("Salvar")),
-                ),
-        ),
+      bottomNavigationBar: FormButton(
+        isLoading: _isLoading,
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            await createWarehouse();
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Preencha o formulário corretamente!"),
+              ),
+            );
+          }
+        },
       ),
     );
   }

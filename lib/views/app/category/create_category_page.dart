@@ -2,10 +2,8 @@
 
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
-import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
-import 'package:get/get.dart';
 
 class CreateCategoryPage extends StatefulWidget {
   const CreateCategoryPage({super.key});
@@ -32,8 +30,6 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
     setState(() {
       _isLoading = false;
     });
-
-    Get.find<CategoryController>().fetchCategories();
   }
 
   @override
@@ -69,23 +65,20 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
           ),
         ),
       ),
-      bottomNavigationBar: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: FormButton(
-          isLoading: _isLoading,
-          onPressed: () async {
-            if (_formKey.currentState!.validate()) {
-              await createCategory();
-              Navigator.pop(context);
-            } else {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text("Preencha o formulário corretamente!"),
-                ),
-              );
-            }
-          },
-        ),
+      bottomNavigationBar: FormButton(
+        isLoading: _isLoading,
+        onPressed: () async {
+          if (_formKey.currentState!.validate()) {
+            await createCategory();
+            Navigator.pop(context);
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text("Preencha o formulário corretamente!"),
+              ),
+            );
+          }
+        },
       ),
     );
   }
