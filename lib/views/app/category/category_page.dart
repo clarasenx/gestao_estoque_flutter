@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
-import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:gestao_estoque_flutter/views/app/category/create_category_page.dart';
@@ -36,23 +36,21 @@ class _CategoryPageState extends State<CategoryPage> {
         return SingleChildScrollView(
           padding: const EdgeInsets.all(24),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              Header(
-                title: "Categoria",
+              AppButton(
+                text: "Adicionar Categoria",
+                icon: Icons.add,
                 onPressed: () async {
-                  final newCategory = await Navigator.push<Category>(
+                  await Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => const CreateCategoryPage()),
+                    MaterialPageRoute(
+                      builder: (context) => const CreateCategoryPage(),
+                    ),
                   );
-
-                  if (newCategory != null) {
-                    setState(() {
-                      categorias.add(newCategory);
-                    });
-                  }
                 },
               ),
+              const SizedBox(height: 12),
               GridView.count(
                 crossAxisCount: getCrossAxisCount(breakpoint),
                 childAspectRatio: 2,

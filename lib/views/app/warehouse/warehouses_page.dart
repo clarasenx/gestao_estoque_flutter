@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
-import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
@@ -62,8 +62,9 @@ class _WarehousePageState extends State<WarehousePage> {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
         children: [
-          Header(
-            title: "Depósitos",
+          AppButton(
+            text: "Adicionar Depósito",
+            icon: Icons.add, 
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -76,8 +77,8 @@ class _WarehousePageState extends State<WarehousePage> {
               setState(() {
                 _loadWarehouses();
               });
-            },
-          ),
+            }),
+          const SizedBox(height: 12),
           Expanded(
             child: FutureBuilder<List<Warehouse>>(
               future: _warehousesFuture,

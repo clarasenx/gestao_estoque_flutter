@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
-import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
 
@@ -27,15 +27,14 @@ class _ProductPageState extends State<ProductPage> {
 
   List<Product> produtos = List.generate(
     10,
-        (i) =>
-        Product(
-          name: 'Produto ${i + 1}',
-          description: 'Descrição ${i + 1}',
-          categoryId: i,
-          currentStock: i,
-          expirationDate: DateTime.now(),
-          id: i,
-        ),
+    (i) => Product(
+      name: 'Produto ${i + 1}',
+      description: 'Descrição ${i + 1}',
+      categoryId: i,
+      currentStock: i,
+      expirationDate: DateTime.now(),
+      id: i,
+    ),
   );
 
   int? selectedCategory = 0;
@@ -52,20 +51,22 @@ class _ProductPageState extends State<ProductPage> {
         return Padding(
           padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // KPIs em Grid
-              Header(
-                title: "Produtos",
+              const SizedBox(height: 12),
+              AppButton(
+                text: "Adicionar Depósito",
+                icon: Icons.add,
                 onPressed: () async {
                   await Navigator.push(
                     context,
                     MaterialPageRoute(
-                      builder: (context) => CreateProductPage(),
+                      builder: (context) => const CreateProductPage(),
                     ),
                   );
                 },
               ),
+              const SizedBox(height: 18),
 
               FilterDatabase(
                 produtos: produtos,
