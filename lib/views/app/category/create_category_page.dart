@@ -17,19 +17,24 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
   final _nameController = TextEditingController();
   bool _isLoading = false;
 
-  Future<void> createCategory() async {
+  Future<Category?> createCategory() async {
     setState(() {
       _isLoading = true;
     });
 
-    final dio = ApiService().dio;
+    try {
+      final dio = ApiService().dio;
 
-    final category = Category(id: 0, name: _nameController.text);
-    await dio.post('/category', data: category.toJson());
+      final category = Category(id: 0, name: _nameController.text);
+      final response = await dio.post('/category', data: category.toJson());
+      final categoryCreated = Category.fromJson(response.data);
 
-    setState(() {
-      _isLoading = false;
-    });
+      return categoryCreated;
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   @override
@@ -69,8 +74,10 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
         isLoading: _isLoading,
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            await createCategory();
-            Navigator.pop(context);
+            final newCategory = await createCategory();
+            if (context.mounted && newCategory != null) {
+              Navigator.pop(context, newCategory);
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
