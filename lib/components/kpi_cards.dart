@@ -28,29 +28,33 @@ class KpiCard extends StatelessWidget {
           ),
           child:
           Padding(
-            padding: const EdgeInsets.all(18),
+            padding: EdgeInsets.all(isTablet ? 18 : 12),
             child: Row(
               children: [
-                Icon(icon, color: iconColor, size: isTablet ? 60 : 40),
+                Icon(icon, color: iconColor, size: isTablet ? 60 : 36),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
-                        value,
-                        style: TextStyle(
-                          fontSize: isTablet ? 34 : 24,
-                          fontWeight: FontWeight.bold,
+                      Flexible(
+                        child: Text(
+                          value,
+                          style: TextStyle(
+                            fontSize: isTablet ? 34 : 24,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
-                      Text(
-                        title,
-                        softWrap: true,
-                        style: TextStyle(
-                          fontSize: isTablet ? 26 : 18,
-                          fontWeight: FontWeight.w500,
+                      Flexible(
+                        child: Text(
+                          title,
+                          softWrap: true,
+                          style: TextStyle(
+                            fontSize: isTablet ? 26 : 16,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ],

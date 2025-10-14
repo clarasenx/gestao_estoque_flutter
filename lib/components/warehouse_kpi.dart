@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
 import 'package:gestao_estoque_flutter/model/kpi.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 
 class WarehouseKpi extends StatefulWidget {
   final int warehouseId;
@@ -13,7 +14,6 @@ class WarehouseKpi extends StatefulWidget {
 }
 
 class _WarehouseKpiState extends State<WarehouseKpi> {
-
   Future<Kpi> getKpis() async {
     try {
       final dio = ApiService().dio;
@@ -28,6 +28,22 @@ class _WarehouseKpiState extends State<WarehouseKpi> {
       print(err);
       throw err;
     }
+  }
+
+  double getChildAspectRatio(Breakpoint breakpoint) {
+    if(breakpoint == Breakpoint.mobile) {
+      return 1;
+    }
+    if(breakpoint == Breakpoint.sm) {
+      return 1.5;
+    }
+    if(breakpoint == Breakpoint.md) {
+      return 2;
+    }
+    if(breakpoint == Breakpoint.lg) {
+      return 3;
+    }
+    return 4;
   }
 
   @override
@@ -77,16 +93,17 @@ class _WarehouseKpiState extends State<WarehouseKpi> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
+            final breakpoint = getBreakpoints(constraints.maxWidth);
             final isTablet = constraints.maxWidth > 750;
 
             return SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
+              padding: EdgeInsets.all(isTablet ? 24 : 0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   GridView.count(
-                    crossAxisCount: isTablet ? 2 : 1,
-                    childAspectRatio: isTablet ? 4 : 3,
+                    crossAxisCount: 2,
+                    childAspectRatio: getChildAspectRatio(breakpoint),
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: kpiCards,

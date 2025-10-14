@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/card.dart';
 import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/create_warehouse_page.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/detail_warehouse_page.dart';
+import 'package:intl/intl.dart';
 
 class WarehousePage extends StatefulWidget {
   const WarehousePage({super.key});
@@ -41,6 +44,16 @@ class _WarehousePageState extends State<WarehousePage> {
       print(err);
       throw err;
     }
+  }
+
+  int getCrossAxisCount(Breakpoint breakpoint) {
+    if(breakpoint == Breakpoint.mobile || breakpoint == Breakpoint.sm) {
+      return 1;
+    }
+    if(breakpoint != Breakpoint.x2l) {
+      return 2;
+    }
+    return 3;
   }
 
   @override
@@ -87,50 +100,42 @@ class _WarehousePageState extends State<WarehousePage> {
 
                 return LayoutBuilder(
                   builder: (context, constraints) {
-                    final isTablet = constraints.maxWidth > 700;
+                    final breakpoint = getBreakpoints(constraints.maxWidth);
+
                     return GridView.builder(
                       shrinkWrap: true,
                       itemCount: warehouses.length,
                       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: isTablet ? 2 : 1,
+                        crossAxisCount: getCrossAxisCount(breakpoint),
                         crossAxisSpacing: 12,
                         mainAxisSpacing: 12,
-                        childAspectRatio: 5,
+                        childAspectRatio: 2,
                       ),
                       itemBuilder: (context, index) {
                         final warehouse = warehouses[index];
-                        return Card(
-                          clipBehavior: Clip.hardEdge,
-                          child: InkWell(
-                            splashColor: Colors.blue.withAlpha(30),
-                            onTap: () async {
-                              await Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) =>
-                                      DetailWarehousePage(warehouse: warehouse),
-                                ),
-                              );
-                            },
-                            child: Padding(
-                              padding: EdgeInsets.all(isTablet ? 10 : 7),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    warehouse.name,
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text("Endereço: ${warehouse.address}"),
-                                ],
+                        return MyCard(
+                          id: warehouse.id,
+                          name: warehouse.name,
+                          description: "Endereço: ${warehouse.address}",
+                          createdAt: warehouse.updatedAt != null
+                              ? DateFormat(
+                                  'dd/MM/yy',
+                                ).format(warehouse.createdAt!)
+                              : null,
+                          updatedAt: warehouse.updatedAt != null
+                              ? DateFormat(
+                                  'dd/MM/yy',
+                                ).format(warehouse.updatedAt!)
+                              : null,
+                          onTap: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    DetailWarehousePage(warehouse: warehouse),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         );
                       },
                     );

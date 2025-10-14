@@ -29,6 +29,7 @@ class _HomePageState extends State<HomePage> {
 
   static const List<DrawerItem> _drawerItems = <DrawerItem>[
     DrawerItem(page: DashboardPage(), title: 'Painel'),
+    DrawerItem(page: WarehousePage(), title: 'Depósitos'),
     DrawerItem(page: ProductPage(), title: 'Produtos'),
     DrawerItem(page: CategoryPage(), title: 'Categorias'),
     DrawerItem(
@@ -44,7 +45,6 @@ class _HomePageState extends State<HomePage> {
       ),
       title: 'Meu Perfil',
     ),
-    DrawerItem(page: WarehousePage(), title: 'Depósitos'),
   ];
 
   void _onItemTapped(int index) {

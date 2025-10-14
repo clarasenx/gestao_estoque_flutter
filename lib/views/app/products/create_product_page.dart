@@ -4,6 +4,7 @@ import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:get/get.dart';
 
 class CreateProductPage extends StatefulWidget {
@@ -111,9 +112,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: Text("Criar Novo Produto"),
-      ),
+      appBar: AppBar(title: Text("Criar Novo Produto")),
       body: FutureBuilder(
         future: _dataFuture,
         builder: (context, asyncSnapshot) {
@@ -170,11 +169,16 @@ class _CreateProductPageState extends State<CreateProductPage> {
                       maxLines: 3,
                     ),
                   ),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsGeometry.all(10),
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final breakpoint = getBreakpoints(constraints.maxWidth);
+                      bool isWide =
+                          breakpoint != Breakpoint.mobile &&
+                          breakpoint != Breakpoint.sm;
+
+                      final children = [
+                        Padding(
+                          padding: const EdgeInsets.all(10),
                           child: DropdownButtonFormField<Category>(
                             initialValue: _selectedCategory,
                             items: categories
@@ -190,50 +194,43 @@ class _CreateProductPageState extends State<CreateProductPage> {
                                 _selectedCategory = category;
                               });
                             },
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               labelText: "Categoria",
                               border: OutlineInputBorder(),
                             ),
-                            validator: (value) {
-                              if (value == null) {
-                                return "Selecione uma categoria";
-                              }
-                              return null;
-                            },
+                            validator: (value) => value == null
+                                ? "Selecione uma categoria"
+                                : null,
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsGeometry.all(10),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
                           child: TextFormField(
                             keyboardType: TextInputType.number,
                             controller: _minimumStockController,
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               border: OutlineInputBorder(),
                               hintText: "Digite o estoque mínimo",
-                              label: Text("Estoque Mínimo"),
+                              labelText: "Estoque Mínimo",
                               floatingLabelBehavior:
                                   FloatingLabelBehavior.always,
                             ),
                           ),
                         ),
-                      ),
-                      Expanded(
-                        child: Padding(
-                          padding: EdgeInsetsGeometry.all(10),
+                        Padding(
+                          padding: const EdgeInsets.all(10),
                           child: TextFormField(
                             controller: _dateController,
-                            readOnly: true, // impede digitação manual
+                            readOnly: true,
                             decoration: InputDecoration(
                               labelText: "Data de Validade",
-                              border: OutlineInputBorder(),
+                              border: const OutlineInputBorder(),
                               suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   if (_dateController.text.isNotEmpty)
                                     IconButton(
-                                      icon: Icon(Icons.clear),
+                                      icon: const Icon(Icons.clear),
                                       onPressed: () {
                                         setState(() {
                                           _dateController.clear();
@@ -241,7 +238,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                                       },
                                     ),
                                   IconButton(
-                                    icon: Icon(Icons.calendar_today),
+                                    icon: const Icon(Icons.calendar_today),
                                     onPressed: () => _selectDate(context),
                                   ),
                                 ],
@@ -250,8 +247,16 @@ class _CreateProductPageState extends State<CreateProductPage> {
                             onTap: () => _selectDate(context),
                           ),
                         ),
-                      ),
-                    ],
+                      ];
+
+                      return isWide
+                          ? Row(
+                              children: children
+                                  .map((child) => Expanded(child: child))
+                                  .toList(),
+                            ) // lado a lado
+                          : Column(children: children); // empilhado
+                    },
                   ),
                 ],
               ),
