@@ -26,11 +26,12 @@ class KpiCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Padding(
+          child:
+          Padding(
             padding: const EdgeInsets.all(18),
             child: Row(
               children: [
-                Icon(icon, color: iconColor, size: isTablet ? 60 : 30),
+                Icon(icon, color: iconColor, size: isTablet ? 60 : 40),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
@@ -40,7 +41,7 @@ class KpiCard extends StatelessWidget {
                       Text(
                         value,
                         style: TextStyle(
-                          fontSize: isTablet ? 34 : 20,
+                          fontSize: isTablet ? 34 : 24,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -48,7 +49,7 @@ class KpiCard extends StatelessWidget {
                         title,
                         softWrap: true,
                         style: TextStyle(
-                          fontSize: isTablet ? 26 : 14,
+                          fontSize: isTablet ? 26 : 18,
                           fontWeight: FontWeight.w500,
                         ),
                       ),

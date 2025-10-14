@@ -6,6 +6,7 @@ class Product {
   final String? description;
   final int categoryId;
   final int currentStock;
+  final int? minimumStock;
   final DateTime? expirationDate;
   final DateTime? createdAt;
   final DateTime? updatedAt;
@@ -19,6 +20,7 @@ class Product {
     this.description,
     required this.categoryId,
     this.category,
+    this.minimumStock,
     required this.currentStock,
     this.expirationDate,
     this.createdAt,
@@ -38,6 +40,7 @@ class Product {
       currentStock: json['currentStock'] != null
           ? json['currentStock'] as int
           : 0,
+      minimumStock: json['minimumStock'],
       expirationDate: json['expirationDate'] != null
           ? DateTime.parse(json['expirationDate'] as String)
           : null,
@@ -59,6 +62,7 @@ class Product {
       'description': description,
       'categoryId': categoryId,
       'currentStock': currentStock,
+      'minimumStock': minimumStock,
     };
     if (expirationDate != null) {
       json['expirationDate'] = expirationDate?.toIso8601String();

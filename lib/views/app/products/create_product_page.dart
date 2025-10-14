@@ -21,6 +21,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final _nameController = TextEditingController();
   final _dateController = TextEditingController();
   final _descriptionController = TextEditingController();
+  final _minimumStockController = TextEditingController();
 
   bool _isLoading = false;
 
@@ -73,6 +74,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
       description: _descriptionController.text,
       categoryId: _selectedCategory!.id,
       currentStock: 0,
+      minimumStock: int.parse(_minimumStockController.text),
       expirationDate: hasExpirationDate
           ? DateTime(
               int.parse(parts[2]), // ano
@@ -111,12 +113,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Criar Novo Produto"),
-        /*leading: Builder(
-          builder: (context) => IconButton(
-            onPressed: () => Scaffold.of(context).openDrawer(),
-            icon: const Icon(Icons.menu),
-          ),
-        ),*/
       ),
       body: FutureBuilder(
         future: _dataFuture,
@@ -211,6 +207,22 @@ class _CreateProductPageState extends State<CreateProductPage> {
                         child: Padding(
                           padding: EdgeInsetsGeometry.all(10),
                           child: TextFormField(
+                            keyboardType: TextInputType.number,
+                            controller: _minimumStockController,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(),
+                              hintText: "Digite o estoque mínimo",
+                              label: Text("Estoque Mínimo"),
+                              floatingLabelBehavior:
+                                  FloatingLabelBehavior.always,
+                            ),
+                          ),
+                        ),
+                      ),
+                      Expanded(
+                        child: Padding(
+                          padding: EdgeInsetsGeometry.all(10),
+                          child: TextFormField(
                             controller: _dateController,
                             readOnly: true, // impede digitação manual
                             decoration: InputDecoration(
@@ -262,7 +274,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
           }
         },
       ),
-
     );
   }
 }

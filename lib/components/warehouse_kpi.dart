@@ -3,19 +3,21 @@ import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
 import 'package:gestao_estoque_flutter/model/kpi.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 
-class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+class WarehouseKpi extends StatefulWidget {
+  final int warehouseId;
+
+  const WarehouseKpi({super.key, required this.warehouseId});
 
   @override
-  State<DashboardPage> createState() => _DashboardState();
+  State<WarehouseKpi> createState() => _WarehouseKpiState();
 }
 
-class _DashboardState extends State<DashboardPage> {
+class _WarehouseKpiState extends State<WarehouseKpi> {
 
   Future<Kpi> getKpis() async {
     try {
       final dio = ApiService().dio;
-      final response = await dio.get('/product/kpi');
+      final response = await dio.get('/product/kpi/${widget.warehouseId}');
 
       final data = response.data;
 
@@ -30,12 +32,14 @@ class _DashboardState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<Kpi>(
       future: getKpis(),
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
+          return const SizedBox(
+            height: 100,
+            child: Center(child: CircularProgressIndicator()),
+          );
         }
 
         if (asyncSnapshot.hasError) {
@@ -73,7 +77,7 @@ class _DashboardState extends State<DashboardPage> {
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            final isTablet = constraints.maxWidth > 600;
+            final isTablet = constraints.maxWidth > 750;
 
             return SingleChildScrollView(
               padding: const EdgeInsets.all(24),
@@ -82,7 +86,7 @@ class _DashboardState extends State<DashboardPage> {
                 children: [
                   GridView.count(
                     crossAxisCount: isTablet ? 2 : 1,
-                    childAspectRatio: isTablet ? 3 : 2.8,
+                    childAspectRatio: isTablet ? 4 : 3,
                     shrinkWrap: true,
                     physics: const NeverScrollableScrollPhysics(),
                     children: kpiCards,

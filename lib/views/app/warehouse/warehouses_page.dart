@@ -3,6 +3,7 @@ import 'package:gestao_estoque_flutter/components/header.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/create_warehouse_page.dart';
+import 'package:gestao_estoque_flutter/views/app/warehouse/detail_warehouse_page.dart';
 
 class WarehousePage extends StatefulWidget {
   const WarehousePage({super.key});
@@ -45,7 +46,7 @@ class _WarehousePageState extends State<WarehousePage> {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       child: Column(
         children: [
           Header(
@@ -102,8 +103,14 @@ class _WarehousePageState extends State<WarehousePage> {
                           clipBehavior: Clip.hardEdge,
                           child: InkWell(
                             splashColor: Colors.blue.withAlpha(30),
-                            onTap: () {
-                              print('Clicked ${warehouse.name}');
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailWarehousePage(warehouse: warehouse),
+                                ),
+                              );
                             },
                             child: Padding(
                               padding: EdgeInsets.all(isTablet ? 10 : 7),

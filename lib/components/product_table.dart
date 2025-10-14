@@ -41,6 +41,7 @@ class ProductsTable extends StatelessWidget {
               DataColumn2(label: Text("Descrição")),
               DataColumn2(label: Text("Category")),
               DataColumn2(label: Text("Qtd. Estoque")),
+              DataColumn2(label: Text("Qtd. Min. Estoque")),
               DataColumn2(label: Text("Validade")),
             ],
             source: ProductData(controller.products),
@@ -68,6 +69,13 @@ class ProductData extends DataTableSource {
         DataCell(Text(product.description ?? '')),
         DataCell(Text(product.category?.name.toString() ?? "")),
         DataCell(Text(product.currentStock.toString())),
+        DataCell(
+          Text(
+            product.minimumStock != null && product.minimumStock! > 0
+                ? product.minimumStock.toString()
+                : 'Indefinido',
+          ),
+        ),
         DataCell(
           Text(
             product.expirationDate != null
