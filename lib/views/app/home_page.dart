@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gestao_estoque_flutter/provider/auth_provider.dart';
-import 'package:gestao_estoque_flutter/service/auth_service.dart';
 import 'package:gestao_estoque_flutter/views/app/category/category_page.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/warehouses_page.dart';
-import 'package:gestao_estoque_flutter/views/login/login_page.dart';
 
 class DrawerItem {
   final Widget page;

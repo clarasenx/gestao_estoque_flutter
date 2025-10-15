@@ -4,8 +4,6 @@ import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:get/get.dart';

@@ -1,1 +1,0 @@
-// configuracao das urls e endpoints da api
