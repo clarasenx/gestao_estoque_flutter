@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
 import 'package:gestao_estoque_flutter/model/aisle.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:intl/intl.dart';
@@ -15,7 +19,7 @@ class AisleList extends StatefulWidget {
 }
 
 class AisleListState extends State<AisleList> {
-  late Future<List<Aisle>> _aisleFuture;
+  late Future<ResponseApi<Aisle>> _aisleFuture;
 
   @override
   void initState() {
@@ -29,7 +33,7 @@ class AisleListState extends State<AisleList> {
     });
   }
 
-  Future<List<Aisle>> getAisle() async {
+  Future<ResponseApi<Aisle>> getAisle() async {
     try {
       final dio = ApiService().dio;
       final response = await dio.get(
@@ -41,9 +45,7 @@ class AisleListState extends State<AisleList> {
 
       print(data);
 
-      final List<Aisle> aisles = (data is List)
-          ? data.map((c) => Aisle.fromJson(c)).toList()
-          : [];
+      final ResponseApi<Aisle> aisles = ResponseApi.fromJson(data, (json)=> Aisle.fromJson(json));
 
       return aisles;
     } catch (err) {
@@ -64,7 +66,7 @@ class AisleListState extends State<AisleList> {
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder<List<Aisle>>(
+    return FutureBuilder<ResponseApi<Aisle>>(
       future: _aisleFuture,
       builder: (context, asyncSnapshot) {
         if (asyncSnapshot.connectionState == ConnectionState.waiting) {
@@ -75,9 +77,9 @@ class AisleListState extends State<AisleList> {
           return const Center(child: Text("Opa... deu erro!"));
         }
 
-        final aisles = asyncSnapshot.data ?? [];
+        final aisles = asyncSnapshot.data;
 
-        if (aisles.length == 0) {
+        if (aisles?.data.isEmpty == true) {
           return Center(
             child: Text("Este depósito não possuí ruas cadastradas."),
           );
@@ -90,7 +92,7 @@ class AisleListState extends State<AisleList> {
             return GridView.builder(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
-              itemCount: aisles.length,
+              itemCount: aisles!.data.length,
               padding: EdgeInsetsGeometry.directional(bottom: 18),
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
                 crossAxisCount: getCrossAxisCount(breakpoint),
@@ -99,7 +101,7 @@ class AisleListState extends State<AisleList> {
                 childAspectRatio: 2.3,
               ),
               itemBuilder: (context, index) {
-                final aisle = aisles[index];
+                final aisle = aisles.data[index];
                 return MyCard(
                   id: aisle.id,
                   name: aisle.name,

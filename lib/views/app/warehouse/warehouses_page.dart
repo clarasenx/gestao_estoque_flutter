@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
@@ -16,7 +17,7 @@ class WarehousePage extends StatefulWidget {
 }
 
 class _WarehousePageState extends State<WarehousePage> {
-  late Future<List<Warehouse>> _warehousesFuture;
+  late Future<ResponseApi<Warehouse>> _warehousesFuture;
 
   @override
   void initState() {
@@ -28,16 +29,17 @@ class _WarehousePageState extends State<WarehousePage> {
     _warehousesFuture = getWarehouses();
   }
 
-  Future<List<Warehouse>> getWarehouses() async {
+  Future<ResponseApi<Warehouse>> getWarehouses() async {
     try {
       final dio = ApiService().dio;
       final response = await dio.get('/warehouse');
 
       final data = response.data;
 
-      final List<Warehouse> warehouses = (data is List)
-          ? data.map((c) => Warehouse.fromJson(c)).toList()
-          : [];
+      final ResponseApi<Warehouse> warehouses = ResponseApi.fromJson(
+        data,
+        (json) => Warehouse.fromJson(json),
+      );
 
       return warehouses;
     } catch (err) {
@@ -47,10 +49,10 @@ class _WarehousePageState extends State<WarehousePage> {
   }
 
   int getCrossAxisCount(Breakpoint breakpoint) {
-    if(breakpoint == Breakpoint.mobile || breakpoint == Breakpoint.sm) {
+    if (breakpoint == Breakpoint.mobile || breakpoint == Breakpoint.sm) {
       return 1;
     }
-    if(breakpoint != Breakpoint.x2l) {
+    if (breakpoint != Breakpoint.x2l) {
       return 2;
     }
     return 3;
@@ -58,13 +60,14 @@ class _WarehousePageState extends State<WarehousePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(24),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           AppButton(
             text: "Adicionar Depósito",
-            icon: Icons.add, 
+            icon: Icons.add,
             onPressed: () async {
               await Navigator.push(
                 context,
@@ -77,73 +80,69 @@ class _WarehousePageState extends State<WarehousePage> {
               setState(() {
                 _loadWarehouses();
               });
-            }),
+            },
+          ),
           const SizedBox(height: 12),
-          Expanded(
-            child: FutureBuilder<List<Warehouse>>(
-              future: _warehousesFuture,
-              builder: (context, asyncSnapshot) {
-                if (asyncSnapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          FutureBuilder<ResponseApi<Warehouse>>(
+            future: _warehousesFuture,
+            builder: (context, asyncSnapshot) {
+              if (asyncSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              }
 
-                if (asyncSnapshot.hasError) {
-                  return const Center(child: Text("Opa... deu erro!"));
-                }
+              if (asyncSnapshot.hasError) {
+                return const Center(child: Text("Opa... deu erro!"));
+              }
 
-                final warehouses = asyncSnapshot.data ?? [];
+              final warehouses = asyncSnapshot.data;
 
-                if (warehouses.isEmpty) {
-                  return const Center(
-                    child: Text("Opa... sem depósitos cadastrados!"),
-                  );
-                }
-
-                return LayoutBuilder(
-                  builder: (context, constraints) {
-                    final breakpoint = getBreakpoints(constraints.maxWidth);
-
-                    return GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: warehouses.length,
-                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: getCrossAxisCount(breakpoint),
-                        crossAxisSpacing: 12,
-                        mainAxisSpacing: 12,
-                        childAspectRatio: 2,
-                      ),
-                      itemBuilder: (context, index) {
-                        final warehouse = warehouses[index];
-                        return MyCard(
-                          id: warehouse.id,
-                          name: warehouse.name,
-                          description: "Endereço: ${warehouse.address}",
-                          createdAt: warehouse.updatedAt != null
-                              ? DateFormat(
-                                  'dd/MM/yy',
-                                ).format(warehouse.createdAt!)
-                              : null,
-                          updatedAt: warehouse.updatedAt != null
-                              ? DateFormat(
-                                  'dd/MM/yy',
-                                ).format(warehouse.updatedAt!)
-                              : null,
-                          onTap: () async {
-                            await Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    DetailWarehousePage(warehouse: warehouse),
-                              ),
-                            );
-                          },
-                        );
-                      },
-                    );
-                  },
+              if (warehouses?.data.isEmpty == true) {
+                return const Center(
+                  child: Text("Opa... sem depósitos cadastrados!"),
                 );
-              },
-            ),
+              }
+
+              return LayoutBuilder(
+                builder: (context, constraints) {
+                  final breakpoint = getBreakpoints(constraints.maxWidth);
+
+                  return GridView.count(
+                    crossAxisCount: getCrossAxisCount(breakpoint),
+                    childAspectRatio: 2,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: warehouses!.data
+                        .map(
+                          (warehouse) => MyCard(
+                            id: warehouse.id,
+                            name: warehouse.name,
+                            description: "Endereço: ${warehouse.address}",
+                            createdAt: warehouse.updatedAt != null
+                                ? DateFormat(
+                                    'dd/MM/yy',
+                                  ).format(warehouse.createdAt!)
+                                : null,
+                            updatedAt: warehouse.updatedAt != null
+                                ? DateFormat(
+                                    'dd/MM/yy',
+                                  ).format(warehouse.updatedAt!)
+                                : null,
+                            onTap: () async {
+                              await Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      DetailWarehousePage(warehouse: warehouse),
+                                ),
+                              );
+                            },
+                          ),
+                        )
+                        .toList(),
+                  );
+                },
+              );
+            },
           ),
           const SizedBox(height: 20),
         ],

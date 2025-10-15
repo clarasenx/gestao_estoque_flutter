@@ -2,6 +2,7 @@ import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/model/Category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -114,9 +115,9 @@ class ProductsController extends GetxController {
       final response = await dio.get('/product');
 
       if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        print(data);
-        products.value = data.map((e) => Product.fromJson(e)).toList();
+        final  data = response.data;
+        final productsResponse = ResponseApi.fromJson(data, (json)=> Product.fromJson(json));
+        products.value = productsResponse.data;
       }
     } catch (e) {
       print("Erro ao buscar produtos: $e");

@@ -3,6 +3,9 @@ import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/service/api_service.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:get/get.dart';
@@ -15,7 +18,7 @@ class CreateProductPage extends StatefulWidget {
 }
 
 class _CreateProductPageState extends State<CreateProductPage> {
-  late Future<List<Category>> _dataFuture;
+  late Future<ResponseApi<Category>> _dataFuture;
   Category? _selectedCategory;
 
   final _formKey = GlobalKey<FormState>();
@@ -32,7 +35,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
     _dataFuture = getCategories();
   }
 
-  Future<List<Category>> getCategories() async {
+  Future<ResponseApi<Category>> getCategories() async {
     try {
       setState(() {
         _isLoading = true;
@@ -40,13 +43,14 @@ class _CreateProductPageState extends State<CreateProductPage> {
       final dio = ApiService().dio;
 
       // duas requisições paralelas
-      final response = await dio.get('/category');
+      final response = await dio.get(
+        '/category',
+        queryParameters: {'perPage': 200},
+      );
 
       final data = response.data;
 
-      final List<Category> categories = (data is List)
-          ? data.map((c) => Category.fromJson(c)).toList()
-          : [];
+      final ResponseApi<Category> categories = ResponseApi.fromJson(data, (json)=> Category.fromJson(json));
 
       return categories;
     } catch (err) {
@@ -181,7 +185,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                           padding: const EdgeInsets.all(10),
                           child: DropdownButtonFormField<Category>(
                             initialValue: _selectedCategory,
-                            items: categories
+                            items: categories.data
                                 .map(
                                   (cat) => DropdownMenuItem(
                                     value: cat,
