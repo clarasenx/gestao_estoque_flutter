@@ -1,10 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class ApiService {
   static final ApiService _instance = ApiService._internal();
 
   late final Dio dio;
+
+  final FlutterSecureStorage storage = const FlutterSecureStorage();
 
   ApiService._internal() {
     dio = Dio(
@@ -16,8 +19,8 @@ class ApiService {
     );
 
     dio.interceptors.add(InterceptorsWrapper(
-      onRequest: (options, handler) {
-        final token = dotenv.env['API_TOKEN'];
+      onRequest: (options, handler) async {
+        final token = await storage.read(key: 'token');
 
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';

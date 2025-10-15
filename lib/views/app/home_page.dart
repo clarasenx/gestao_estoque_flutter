@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gestao_estoque_flutter/provider/auth_provider.dart';
+import 'package:gestao_estoque_flutter/service/auth_service.dart';
 import 'package:gestao_estoque_flutter/views/app/category/category_page.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/warehouses_page.dart';
+import 'package:gestao_estoque_flutter/views/login/login_page.dart';
 
 class DrawerItem {
   final Widget page;
@@ -12,14 +16,14 @@ class DrawerItem {
   const DrawerItem({required this.page, required this.title});
 }
 
-class HomePage extends StatefulWidget {
+class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
 
   @override
-  State<StatefulWidget> createState() => _HomePageState();
+  ConsumerState<HomePage> createState() => _HomePageState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
 
   static const TextStyle optionStyle = TextStyle(
@@ -71,8 +75,7 @@ class _HomePageState extends State<HomePage> {
       ),
       body: SafeArea(child: _drawerItems[_selectedIndex].page),
       drawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
+        child: Column(
           children: [
             const SizedBox(
               height: 100,
@@ -90,21 +93,45 @@ class _HomePageState extends State<HomePage> {
                 ),
               ),
             ),
-            ..._drawerItems.asMap().entries.map((entry) {
-              final index = entry.key;
-              final item = entry.value;
-              return ListTile(
-                selected: _selectedIndex == index,
-                title: Text(
-                  item.title,
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-                ),
-                onTap: () {
-                  _onItemTapped(index);
-                  Navigator.pop(context);
-                },
-              );
-            }),
+            Expanded(
+              child: ListView(
+                children: _drawerItems.asMap().entries.map((entry) {
+                  final index = entry.key;
+                  final item = entry.value;
+                  return ListTile(
+                    selected: _selectedIndex == index,
+                    title: Text(
+                      item.title,
+                      style: const TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    onTap: () {
+                      _onItemTapped(index);
+                      Navigator.pop(context);
+                    },
+                  );
+                }).toList(),
+              ),
+            ),
+            const Divider(),
+            ListTile(
+              title: const Text(
+                "Sair",
+                style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
+              ),
+              leading: const Icon(Icons.logout),
+              onTap: () async {
+                final authNotifier = ref.read(authStateProvider.notifier);
+                await authNotifier.logout();
+                /*Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => LoginPage()),
+                  (Route<dynamic> route) => false,
+                );*/
+              },
+            ),
           ],
         ),
       ),
