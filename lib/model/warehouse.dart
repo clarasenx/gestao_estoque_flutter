@@ -28,7 +28,6 @@ class Warehouse {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'name': name,
       'address': address,
     };

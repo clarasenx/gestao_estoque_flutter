@@ -24,18 +24,22 @@ class Aisle {
       id: json['id'] as int,
       name: json['name'] as String,
       warehouseId: json['warehouseId'] as int,
-      warehouse: Warehouse.fromJson(json['warehouse']),
-      createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
-      deletedAt: json['deletedAt'] != null ? DateTime.parse(json['deletedAt'] as String) : null,
+      warehouse: json['warehouse'] != null
+          ? Warehouse.fromJson(json['warehouse'])
+          : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'] as String)
+          : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.parse(json['deletedAt'] as String)
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'warehouseId': warehouseId,
-    };
+    return {'name': name, 'warehouseId': warehouseId};
   }
 }

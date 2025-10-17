@@ -4,6 +4,7 @@ import 'package:gestao_estoque_flutter/provider/auth_provider.dart';
 import 'package:gestao_estoque_flutter/views/app/category/category_page.dart';
 import 'package:gestao_estoque_flutter/views/app/dashboard/dashboard_page.dart';
 import 'package:gestao_estoque_flutter/views/app/products/products_page.dart';
+import 'package:gestao_estoque_flutter/views/app/transaction/transactions_page.dart';
 import 'package:gestao_estoque_flutter/views/app/user/user_page.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/warehouses_page.dart';
 
@@ -34,10 +35,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     DrawerItem(page: WarehousePage(), title: 'Depósitos'),
     DrawerItem(page: ProductPage(), title: 'Produtos'),
     DrawerItem(page: CategoryPage(), title: 'Categorias'),
-    DrawerItem(
-      page: Text('Movimentações', style: optionStyle),
-      title: 'Movimentações',
-    ),
+    DrawerItem(page: TransactionPage(), title: 'Movimentações'),
     DrawerItem(
       page: UserPage(
         name: 'leonardo',

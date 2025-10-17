@@ -13,8 +13,8 @@ class ApiService {
     dio = Dio(
       BaseOptions(
         baseUrl: dotenv.env['API_BASE_URL'] ?? 'http://localhost:3000',
-        connectTimeout: const Duration(seconds: 5),
-        receiveTimeout: const Duration(seconds: 5),
+        /*connectTimeout: const Duration(seconds: 5),
+        receiveTimeout: const Duration(seconds: 5),*/
       ),
     );
 

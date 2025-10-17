@@ -55,7 +55,7 @@ class _ProductPageState extends State<ProductPage> {
             children: [
               const SizedBox(height: 12),
               AppButton(
-                text: "Adicionar Depósito",
+                text: "Adicionar Produto",
                 icon: Icons.add,
                 onPressed: () async {
                   await Navigator.push(

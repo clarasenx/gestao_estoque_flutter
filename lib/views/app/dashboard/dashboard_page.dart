@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
 import 'package:gestao_estoque_flutter/model/kpi.dart';
-import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});

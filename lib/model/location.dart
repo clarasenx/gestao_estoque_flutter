@@ -1,11 +1,15 @@
-import 'package:gestao_estoque_flutter/model/product.dart';
+import 'package:gestao_estoque_flutter/model/aisle.dart';
+import 'package:gestao_estoque_flutter/model/stock.dart';
+import 'package:gestao_estoque_flutter/model/transaction_location.dart';
 
 class Location {
   final int id;
   final int aisleId;
+  final Aisle? aisle;
   final String shelf;
   final String side;
-  final List<Product>? products;
+  final List<TransactionLocation>? transactionLocations;
+  final List<Stock>? stock;
   final DateTime? createdAt;
   final DateTime? updatedAt;
   final DateTime? deletedAt;
@@ -15,7 +19,9 @@ class Location {
     required this.aisleId,
     required this.shelf,
     required this.side,
-    this.products,
+    this.aisle,
+    this.transactionLocations,
+    this.stock,
     this.createdAt,
     this.updatedAt,
     this.deletedAt,
@@ -23,22 +29,29 @@ class Location {
 
   factory Location.fromJson(Map<String, dynamic> json) {
     return Location(
-        id: json['id'] as int,
-        aisleId: json['aisleId'] as int,
-        shelf: json['shelf'] as String,
-        side: json['side'] as String,
-        createdAt: json['createdAt'] != null ? DateTime.parse(json['createdAt'] as String) : null,
-        updatedAt: json['updatedAt'] != null ? DateTime.parse(json['updatedAt'] as String) : null,
-        deletedAt: json['deletedAt'] != null ? DateTime.parse(json['deletedAt'] as String) : null,
+      id: json['id'],
+      aisleId: json['aisleId'],
+      shelf: json['shelf'],
+      side: json['side'],
+      aisle: json['aisle'] != null ? Aisle.fromJson(json['aisle']) : null,
+      transactionLocations: json['transactionLocations']?.map(
+        (transactionLocations) =>
+            TransactionLocation.fromJson(transactionLocations),
+      ),
+      stock: json['stock']?.map((stock) => Stock.fromJson(stock)),
+      createdAt: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.parse(json['updatedAt'])
+          : null,
+      deletedAt: json['deletedAt'] != null
+          ? DateTime.parse(json['deletedAt'])
+          : null,
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'aisleId': aisleId,
-      'shelf': shelf,
-      'side': side,
-    };
+    return {'aisleId': aisleId, 'shelf': shelf, 'side': side};
   }
 }

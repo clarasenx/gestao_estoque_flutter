@@ -1,0 +1,1 @@
+enum TransactionTypeEnum { incoming, outgoing }

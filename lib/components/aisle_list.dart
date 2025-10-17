@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
 import 'package:gestao_estoque_flutter/model/aisle.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:intl/intl.dart';
 

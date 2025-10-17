@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/model/aisle.dart';
-import 'package:gestao_estoque_flutter/service/api_service.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 
 class CreateAislePage extends StatefulWidget {
   final int warehouseId;
