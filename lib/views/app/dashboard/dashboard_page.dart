@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/kpi_cards.dart';
-import 'package:gestao_estoque_flutter/model/kpi.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
+import 'package:gestao_estoque_flutter/model/kpi.dart';
+import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
+import 'package:gestao_estoque_flutter/views/app/transaction/create_transaction_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -11,7 +14,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardState extends State<DashboardPage> {
-
   Future<Kpi> getKpis() async {
     try {
       final dio = ApiService().dio;
@@ -24,13 +26,12 @@ class _DashboardState extends State<DashboardPage> {
       return kpi;
     } catch (err) {
       print(err);
-      throw err;
+      rethrow;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-
     return FutureBuilder<Kpi>(
       future: getKpis(),
       builder: (context, asyncSnapshot) {
@@ -80,6 +81,44 @@ class _DashboardState extends State<DashboardPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  GridView.count(
+                    crossAxisCount: isTablet ? 4 : 2,
+                    childAspectRatio: isTablet ? 8 : 6,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      Padding(
+                        padding: EdgeInsetsGeometry.only(right: 5),
+                        child: AppButton(
+                          text: "Adicionar Produto",
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CreateProductPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                      Padding(
+                        padding: EdgeInsetsGeometry.only(left: 5),
+                        child: AppButton(
+                          text: "Fazer Movimentação",
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CreateTransactionPage(),
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 12),
                   GridView.count(
                     crossAxisCount: isTablet ? 2 : 1,
                     childAspectRatio: isTablet ? 3 : 2.8,
