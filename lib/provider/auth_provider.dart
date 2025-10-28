@@ -34,11 +34,10 @@ class AuthNotifier extends StateNotifier<AuthStatus> {
     try {
       state = AuthStatus.loading;
       await _service.login(email, password);
-      print("login deu certo");
       state = AuthStatus.loggedIn;
     } catch (err) {
       state = AuthStatus.loggedOut;
-      throw err;
+      rethrow;
     }
   }
 

@@ -36,15 +36,7 @@ class _HomePageState extends ConsumerState<HomePage> {
     DrawerItem(page: ProductPage(), title: 'Produtos'),
     DrawerItem(page: CategoryPage(), title: 'Categorias'),
     DrawerItem(page: TransactionPage(), title: 'Movimentações'),
-    DrawerItem(
-      page: UserPage(
-        name: 'leonardo',
-        cpf: '000.000.000-00',
-        role: 'ADMIN',
-        password: 'password',
-      ),
-      title: 'Meu Perfil',
-    ),
+    DrawerItem(page: UserPage(), title: 'Meu Perfil'),
   ];
 
   void _onItemTapped(int index) {
