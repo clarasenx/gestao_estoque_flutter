@@ -6,13 +6,13 @@ import 'package:gestao_estoque_flutter/service/auth_service.dart';
 class EditUserPage extends StatefulWidget {
   final String name;
   final String cpf;
-  final String role;
+  final String phone;
 
   const EditUserPage({
     super.key,
     required this.name,
     required this.cpf,
-    required this.role,
+    required this.phone,
   });
 
   @override
@@ -25,8 +25,7 @@ class _EditUserPageState extends State<EditUserPage> {
   final AuthService _auth = AuthService();
 
   late TextEditingController nameController;
-  late TextEditingController cpfController;
-  late TextEditingController roleController;
+  late TextEditingController phoneController;
 
   bool _isLoading = false;
 
@@ -34,8 +33,7 @@ class _EditUserPageState extends State<EditUserPage> {
   void initState() {
     super.initState();
     nameController = TextEditingController(text: widget.name);
-    cpfController = TextEditingController(text: widget.cpf);
-    roleController = TextEditingController(text: widget.role);
+    phoneController = TextEditingController(text: widget.phone);
   }
 
   Future<void> saveUser() async {
@@ -47,7 +45,7 @@ class _EditUserPageState extends State<EditUserPage> {
 
       await _api.dio.patch(
         '/user/$userId',
-        data: {'name': nameController.text, 'register': cpfController.text},
+        data: {'name': nameController.text, 'phone': phoneController.text},
       );
 
       if (mounted) Navigator.pop(context);
@@ -65,23 +63,13 @@ class _EditUserPageState extends State<EditUserPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        iconTheme: IconThemeData(color: Colors.white),
+        title: Text("Editar Perfil", style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.blueAccent,
+      ),
       body: Column(
         children: [
-          Container(
-            width: double.infinity,
-            color: Colors.blueAccent,
-            padding: const EdgeInsets.symmetric(vertical: 40, horizontal: 16),
-            child: const Center(
-              child: Text(
-                'Editar Perfil',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 32),
@@ -108,9 +96,7 @@ class _EditUserPageState extends State<EditUserPage> {
                           const SizedBox(height: 24),
                           _buildTextField('Nome', nameController),
                           const SizedBox(height: 12),
-                          _buildTextField('CPF', cpfController),
-                          const SizedBox(height: 12),
-                          _buildTextField('Função', roleController),
+                          _buildTextField('Telefone', phoneController),
                           const SizedBox(height: 32),
                           AppButton(
                             text: 'Salvar Alterações',

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/model/aisle.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
 import 'package:intl/intl.dart';
 
@@ -42,12 +42,15 @@ class AisleListState extends State<AisleList> {
 
       print(data);
 
-      final ResponseApi<Aisle> aisles = ResponseApi.fromJson(data, (json)=> Aisle.fromJson(json));
+      final ResponseApi<Aisle> aisles = ResponseApi.fromJson(
+        data,
+        (json) => Aisle.fromJson(json),
+      );
 
       return aisles;
     } catch (err) {
       print(err);
-      throw err;
+      rethrow;
     }
   }
 

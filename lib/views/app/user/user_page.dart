@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
+import 'package:gestao_estoque_flutter/model/enum/role_enum.dart';
+import 'package:gestao_estoque_flutter/model/user.dart';
 import 'package:gestao_estoque_flutter/service/auth_service.dart';
 import 'package:gestao_estoque_flutter/views/app/user/edit_user_page.dart';
 
@@ -14,7 +16,7 @@ class UserPage extends StatefulWidget {
 class _UserPageState extends State<UserPage> {
   final AuthService _authService = AuthService();
   final ApiService _api = ApiService();
-  Map<String, dynamic>? userData;
+  User? userData;
   bool _loading = true;
 
   @override
@@ -29,7 +31,7 @@ class _UserPageState extends State<UserPage> {
 
       final response = await _api.dio.get('/user/$userId');
       setState(() {
-        userData = response.data;
+        userData = User.fromJson(response.data);
         _loading = false;
       });
     } catch (e) {
@@ -62,7 +64,7 @@ class _UserPageState extends State<UserPage> {
                 const Icon(Icons.account_circle, size: 90, color: Colors.white),
                 const SizedBox(height: 12),
                 Text(
-                  userData!['name'] ?? '',
+                  userData!.name,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
@@ -71,11 +73,23 @@ class _UserPageState extends State<UserPage> {
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  userData!['role'] ?? '',
-                  style: const TextStyle(fontSize: 16, color: Colors.white70),
-                  textAlign: TextAlign.center,
-                ),
+                if (userData!.roles != null)
+                  ...(userData!.roles!
+                      .map(
+                        (role) => Text(
+                          role.role == RoleEnum.admin
+                              ? 'Administrador'
+                              : role.role == RoleEnum.manager
+                              ? 'Gerente'
+                              : 'Operador',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.white70,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      )
+                      .toList()),
               ],
             ),
           ),
@@ -101,13 +115,19 @@ class _UserPageState extends State<UserPage> {
                           textAlign: TextAlign.center,
                         ),
                         const SizedBox(height: 24),
-                        _buildInfoRow('Nome', userData!['name']),
+                        _buildInfoRow('Nome', userData!.name),
                         const SizedBox(height: 12),
-                        _buildInfoRow('CPF', userData!['register']),
+                        _buildInfoRow(
+                          'CPF',
+                          userData!.register ?? 'Não cadastrado',
+                        ),
                         /* const SizedBox(height: 12),
-                        _buildInfoRow('Função', userData!['role']), */
+                        _buildInfoRow('Função', userData!.role), */
                         const SizedBox(height: 12),
-                        _buildInfoRow('Senha', '********'),
+                        _buildInfoRow(
+                          'Telefone',
+                          userData!.phone ?? 'Não cadastrado',
+                        ),
                         const SizedBox(height: 32),
                         AppButton(
                           text: 'Editar Perfil',
@@ -117,9 +137,9 @@ class _UserPageState extends State<UserPage> {
                               context,
                               MaterialPageRoute(
                                 builder: (context) => EditUserPage(
-                                  name: userData!['name'],
-                                  cpf: userData!['register'],
-                                  role: 'role',
+                                  name: userData!.name,
+                                  cpf: userData!.register ?? '',
+                                  phone: userData!.phone ?? '',
                                 ),
                               ),
                             );

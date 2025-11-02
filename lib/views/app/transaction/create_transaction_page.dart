@@ -6,6 +6,7 @@ import 'package:gestao_estoque_flutter/components/create_transaction_location_ta
 import 'package:gestao_estoque_flutter/components/datepicker.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/components/select.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/model/aisle.dart';
 import 'package:gestao_estoque_flutter/model/enum/transaction_type_enum.dart';
 import 'package:gestao_estoque_flutter/model/location.dart';
@@ -14,7 +15,6 @@ import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/model/transaction.dart';
 import 'package:gestao_estoque_flutter/model/transaction_location.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
-import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/service/transaction_service.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/create_warehouse_page.dart';
 import 'package:responsive_grid/responsive_grid.dart';
@@ -50,7 +50,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
 
   List<Location> _locations = [];
 
-  List<TransactionLocation> _transactionLocations = [];
+  final List<TransactionLocation> _transactionLocations = [];
 
   DateTime? _dateSelected = DateTime.now();
   TransactionTypeEnum? _typeSelected;
@@ -96,7 +96,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       );
       return aisles.data;
     } catch (err) {
-      throw err;
+      rethrow;
     } finally {
       setState(() {
         _isFetchingAisle = false;
@@ -122,7 +122,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       );
       return aisles.data;
     } catch (err) {
-      throw err;
+      rethrow;
     } finally {
       setState(() {
         _isFetchingLocation = false;
@@ -140,7 +140,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       );
       return locations.data;
     } catch (err) {
-      throw err;
+      rethrow;
     }
   }
 
@@ -157,7 +157,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       );
       return products.data;
     } catch (err) {
-      throw err;
+      rethrow;
     }
   }
 
@@ -181,9 +181,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
           print(tl.locationId);
           return CreateTransactionLocationByTransactionLocation(
             locationId: tl.locationId != 0 ? tl.locationId : null,
-            location: tl.locationId == 0 || tl.locationId == null
-                ? tl.location
-                : null,
+            location: tl.locationId == 0 ? tl.location : null,
             quantity: tl.quantity,
           );
         }).toList(),
@@ -192,7 +190,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       await _transactionService.create(transaction);
       return true;
     } catch (err) {
-      throw err;
+      rethrow;
     } finally {
       setState(() {
         _isLoading = false;
@@ -296,23 +294,18 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
         xs: 6,
         sm: 3,
         lg: 2,
-        child: Padding(
-          padding: EdgeInsetsGeometry.all(10),
-          child: TextFormField(
-            controller: _sideController,
-            decoration: InputDecoration(
-              border: OutlineInputBorder(),
-              hintText: "Digite o lado da prateleira",
-              label: Text("Lado da Prateleira"),
-              floatingLabelBehavior: FloatingLabelBehavior.always,
-            ),
-            validator: (value) {
-              if (!_locationExists && (value == null || value.isEmpty)) {
-                return "Preencha o lado da prateleira";
-              }
-              return null;
-            },
-          ),
+        child: Select<String>(
+          initialValue: null,
+          items: [
+            Item(value: "Direita", text: "Direita"),
+            Item(value: "Esquerda", text: "Esquerda"),
+          ],
+          label: "Lado da Prateleira",
+          onChanged: (value) async {
+            setState(() {
+              _sideController.text = value;
+            });
+          },
         ),
       ),
       ResponsiveGridCol(

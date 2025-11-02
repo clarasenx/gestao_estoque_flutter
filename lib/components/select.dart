@@ -49,7 +49,8 @@ class Select<Type> extends StatelessWidget {
           labelText: label,
           border: OutlineInputBorder(),
         ),
-        validator: (value) => value == null && isRequired ? "Selecione um Item" : null,
+        validator: (value) =>
+            value == null && isRequired ? "Selecione um Item" : null,
       ),
     );
   }
