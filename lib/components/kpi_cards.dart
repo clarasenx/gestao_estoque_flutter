@@ -26,12 +26,11 @@ class KpiCard extends StatelessWidget {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          child:
-          Padding(
-            padding: EdgeInsets.all(isTablet ? 18 : 12),
+          child: Padding(
+            padding: EdgeInsets.all(isTablet ? 20 : 16),
             child: Row(
               children: [
-                Icon(icon, color: iconColor, size: isTablet ? 60 : 36),
+                Icon(icon, color: iconColor, size: isTablet ? 80 : 36),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(

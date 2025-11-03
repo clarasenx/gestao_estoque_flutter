@@ -25,10 +25,6 @@ class HomePage extends ConsumerStatefulWidget {
 class _HomePageState extends ConsumerState<HomePage> {
   int _selectedIndex = 0;
 
-  static const TextStyle optionStyle = TextStyle(
-    fontSize: 30,
-    fontWeight: FontWeight.bold,
-  );
 
   static const List<DrawerItem> _drawerItems = <DrawerItem>[
     DrawerItem(page: DashboardPage(), title: 'Painel'),
