@@ -28,6 +28,18 @@ class Meta {
       to: json['to'],
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'page': page,
+      'count': count,
+      'perPage': perPage,
+      'hasMore': hasMore,
+      'lastPage': lastPage,
+      'from': from,
+      'to': to,
+    };
+  }
 }
 
 class ResponseApi<TData> {
@@ -40,9 +52,20 @@ class ResponseApi<TData> {
     Map<String, dynamic> json,
     TData Function(Map<String, dynamic>) fromJson,
   ) {
+    final rawData = json['data'];
+
     return ResponseApi(
-      data: (json['data'] as List).map((e) => fromJson(e)).toList(),
+      data: rawData is List
+          ? rawData.map((e) => fromJson(e as Map<String, dynamic>)).toList()
+          : [], // ← aqui evita o erro
       meta: Meta.fromJson(json['meta']),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'data': data.map((element) => element.toString()),
+      'meta': meta.toJson(),
+    };
   }
 }

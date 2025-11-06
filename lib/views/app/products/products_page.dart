@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
 import 'package:gestao_estoque_flutter/components/filter_datatable.dart';
+import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
+import 'package:get/get.dart';
 
 class ProductPage extends StatefulWidget {
   const ProductPage({super.key});
@@ -13,40 +15,31 @@ class ProductPage extends StatefulWidget {
 }
 
 class _ProductPageState extends State<ProductPage> {
-  void onCategoryChanged(int? value) {
+  final _nameController = TextEditingController();
+  Category? _categorySelected = null;
+
+  void _onCategorySelected(Category? value) {
     setState(() {
-      selectedCategory = value;
+      _categorySelected = value;
     });
   }
 
-  void onLocationChanged(int? value) {
+  void refresh() {
     setState(() {
-      selectedLocation = value;
+      Get.find<ProductsController>().fetchProducts(
+        ProductFilter(
+          categoryId: _categorySelected?.id,
+          name: _nameController.text,
+        ),
+      );
     });
   }
-
-  List<Product> produtos = List.generate(
-    10,
-    (i) => Product(
-      name: 'Produto ${i + 1}',
-      description: 'Descrição ${i + 1}',
-      categoryId: i,
-      currentStock: i,
-      expirationDate: DateTime.now(),
-      id: i,
-    ),
-  );
-
-  int? selectedCategory = 0;
-  int? selectedLocation = 0;
-  String nomeFilter = '';
-  String validadeFilter = '';
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final isTablet = constraints.maxWidth > 600;
+        final _isTablet = constraints.maxWidth > 600;
 
         return Padding(
           padding: EdgeInsetsGeometry.symmetric(horizontal: 12),
@@ -69,22 +62,16 @@ class _ProductPageState extends State<ProductPage> {
               const SizedBox(height: 18),
 
               FilterDatabase(
-                produtos: produtos,
-                selectedCategory: selectedCategory,
-                selectedLocation: selectedLocation,
-                nameFilter: nomeFilter,
-                expirationFilter: validadeFilter,
-                onCategoryChanged: onCategoryChanged,
-                onLocationChanged: onLocationChanged,
-                onNameChanged: (value) => setState(() => nomeFilter = value),
-                onExpirationChanged: (value) =>
-                    setState(() => validadeFilter = value),
-                isTablet: isTablet,
+                onCategorySelected: _onCategorySelected,
+                categorySelected: _categorySelected,
+                nameController: _nameController,
+                isTablet: _isTablet,
+                onFilter: refresh,
               ),
 
               const SizedBox(height: 20),
 
-              Expanded(child: ProductsTable()),
+              Expanded(child: ProductsTable(refresh: refresh)),
 
               const SizedBox(height: 20),
             ],

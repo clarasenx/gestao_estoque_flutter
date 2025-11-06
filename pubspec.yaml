@@ -10,7 +10,7 @@ dependencies:
   flutter:
     sdk: flutter
 
-  data_table_2: ^2.5.12
+  data_table_2: ^2.6.0
   get: ^4.7.2
   cupertino_icons: ^1.0.8
   flutter_dotenv: ^6.0.0
@@ -20,6 +20,7 @@ dependencies:
   flutter_riverpod: ^3.0.3
   responsive_grid: ^2.4.4
   jwt_decoder: ^2.0.1
+  provider: ^6.1.5+1
   
 dev_dependencies:
   flutter_test:

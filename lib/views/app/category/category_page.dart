@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/components/card.dart';
+import 'package:gestao_estoque_flutter/components/confirm_dialog.dart';
+import 'package:gestao_estoque_flutter/components/pagination.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
@@ -16,6 +18,8 @@ class CategoryPage extends StatefulWidget {
 
 class _CategoryPageState extends State<CategoryPage> {
   late Future<ResponseApi<Category>> _categoriesFuture;
+  int currentPage = 1;
+  int totalPages = 5;
 
   String nomeFilter = '';
 
@@ -32,7 +36,10 @@ class _CategoryPageState extends State<CategoryPage> {
   Future<ResponseApi<Category>> getCategorys() async {
     try {
       final dio = ApiService().dio;
-      final response = await dio.get('/category');
+      final response = await dio.get(
+        '/category',
+        queryParameters: {"perPage": 6, "page": currentPage},
+      );
 
       final data = response.data;
 
@@ -40,6 +47,9 @@ class _CategoryPageState extends State<CategoryPage> {
         data,
         (json) => Category.fromJson(json),
       );
+
+      currentPage = categories.meta.page;
+      totalPages = categories.meta.lastPage;
 
       return categories;
     } catch (err) {
@@ -103,14 +113,103 @@ class _CategoryPageState extends State<CategoryPage> {
               return LayoutBuilder(
                 builder: (context, constraints) {
                   final breakpoint = getBreakpoints(constraints.maxWidth);
-                  return GridView.count(
-                    crossAxisCount: getCrossAxisCount(breakpoint),
-                    childAspectRatio: 2,
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    children: categories!.data
-                        .map((i) => MyCard(name: i.name, id: i.id))
-                        .toList(),
+                  return Column(
+                    children: [
+                      GridView.count(
+                        crossAxisCount: getCrossAxisCount(breakpoint),
+                        childAspectRatio: 2,
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        children: categories!.data
+                            .map(
+                              (category) => MyCard(
+                                name: category.name,
+                                id: category.id,
+                                menuItems: [
+                                  PopupMenuItem(
+                                    onTap: () async {
+                                      await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) =>
+                                              CreateCategoryPage(
+                                                category: category,
+                                              ),
+                                        ),
+                                      );
+                                      setState(() {
+                                        _loadCategorys();
+                                      });
+                                    },
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          Icons.edit,
+                                          size: 18,
+                                          color: Colors.blueAccent,
+                                        ),
+                                        Text(
+                                          "Editar",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.blueAccent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  PopupMenuItem(
+                                    onTap: () async {
+                                      final deleted = await showConfirmDeleteDialog(
+                                        context,
+                                        title: "Apagar Categoria",
+                                        message:
+                                            "Tem certeza que deseja apagar essa categoria?",
+                                        endpoint: "category",
+                                        id: category.id,
+                                      );
+                                      if (deleted) {
+                                        setState(() {
+                                          _loadCategorys();
+                                        });
+                                      }
+                                    },
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        Icon(
+                                          Icons.delete,
+                                          size: 18,
+                                          color: Colors.redAccent,
+                                        ),
+                                        Text(
+                                          "Excluir",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.redAccent,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                            .toList(),
+                      ),
+                      SizedBox(height: 40,),
+                      PaginationWidget(
+                        currentPage: currentPage,
+                        totalPages: totalPages,
+                        onPageChanged: (page) {
+                          setState(() {
+                            currentPage = page;
+                            _loadCategorys();
+                          });
+                        },
+                      ),
+                    ],
                   );
                 },
               );

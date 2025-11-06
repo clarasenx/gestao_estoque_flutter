@@ -1,14 +1,18 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
+import 'package:gestao_estoque_flutter/components/confirm_dialog.dart';
 import 'package:gestao_estoque_flutter/model/Category.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
+import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 class ProductsTable extends StatelessWidget {
-  const ProductsTable({super.key});
+  final void Function() refresh;
+
+  const ProductsTable({super.key, required this.refresh});
 
   @override
   Widget build(BuildContext context) {
@@ -44,8 +48,13 @@ class ProductsTable extends StatelessWidget {
               DataColumn2(label: Text("Qtd. Estoque")),
               DataColumn2(label: Text("Qtd. Min. Estoque")),
               DataColumn2(label: Text("Validade")),
+              DataColumn2(label: Text("Ações")),
             ],
-            source: ProductData(controller.products),
+            source: ProductData(
+              refresh: refresh,
+              products: controller.products,
+              context: context,
+            ),
           ),
         ),
       );
@@ -55,8 +64,14 @@ class ProductsTable extends StatelessWidget {
 
 class ProductData extends DataTableSource {
   final List<Product> products;
+  final BuildContext context;
+  final void Function() refresh;
 
-  ProductData(this.products);
+  ProductData({
+    required this.refresh,
+    required this.products,
+    required this.context,
+  });
 
   @override
   DataRow? getRow(int index) {
@@ -84,6 +99,39 @@ class ProductData extends DataTableSource {
                 : 'Indefinido',
           ),
         ),
+        DataCell(
+          Row(
+            spacing: 10,
+            children: [
+              IconButton(
+                onPressed: () async {
+                  await Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => CreateProductPage(product: product),
+                    ),
+                  );
+                },
+                icon: Icon(Icons.edit, color: Colors.blueAccent),
+              ),
+              IconButton(
+                onPressed: () async {
+                  final deleted = await showConfirmDeleteDialog(
+                    context,
+                    title: "Apagar Produto",
+                    message: "Tem certeza que deseja apagar esse produto?",
+                    endpoint: "product",
+                    id: product.id,
+                  );
+                  if (deleted) {
+                    refresh();
+                  }
+                },
+                icon: Icon(Icons.delete, color: Colors.redAccent),
+              ),
+            ],
+          ),
+        ),
       ]),
     );
   }
@@ -98,6 +146,24 @@ class ProductData extends DataTableSource {
   int get selectedRowCount => 0;
 }
 
+class ProductFilter {
+  final int? categoryId;
+  final String? name;
+
+  const ProductFilter({this.categoryId, this.name});
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> json = {};
+    if (categoryId != null) {
+      json['categoryId'] = categoryId;
+    }
+    if (name != null && name!.isNotEmpty) {
+      json['search'] = name;
+    }
+    return json;
+  }
+}
+
 class ProductsController extends GetxController {
   var products = <Product>[].obs;
   final isLoading = true.obs;
@@ -105,51 +171,31 @@ class ProductsController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    fetchProducts();
+    fetchProducts(null);
   }
 
-  Future<void> fetchProducts() async {
+  Future<void> fetchProducts(ProductFilter? filter) async {
     try {
       isLoading.value = true;
       final dio = ApiService().dio;
-      final response = await dio.get('/product');
+      final response = await dio.get(
+        '/product',
+        queryParameters: {
+          if (filter != null) ...filter.toJson(),
+          "perPage": 1000,
+        },
+      );
 
       if (response.statusCode == 200) {
-        final  data = response.data;
-        final productsResponse = ResponseApi.fromJson(data, (json)=> Product.fromJson(json));
+        final data = response.data;
+        final productsResponse = ResponseApi.fromJson(
+          data,
+          (json) => Product.fromJson(json),
+        );
         products.value = productsResponse.data;
       }
     } catch (e) {
       print("Erro ao buscar produtos: $e");
-    } finally {
-      isLoading.value = false;
-    }
-  }
-}
-
-class CategoryController extends GetxController {
-  var categories = <Category>[].obs;
-  final isLoading = true.obs;
-
-  @override
-  void onInit() {
-    super.onInit();
-    fetchCategories();
-  }
-
-  Future<void> fetchCategories() async {
-    try {
-      isLoading.value = true;
-      final dio = ApiService().dio;
-      final response = await dio.get('/category');
-
-      if (response.statusCode == 200) {
-        final List<dynamic> data = response.data;
-        print(data);
-        categories.value = data.map((e) => Category.fromJson(e)).toList();
-      }
-    } catch (e) {
-      print("Erro ao buscar categorias: $e");
     } finally {
       isLoading.value = false;
     }

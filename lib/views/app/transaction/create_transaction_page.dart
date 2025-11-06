@@ -12,6 +12,7 @@ import 'package:gestao_estoque_flutter/model/enum/transaction_type_enum.dart';
 import 'package:gestao_estoque_flutter/model/location.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
+import 'package:gestao_estoque_flutter/model/stock.dart';
 import 'package:gestao_estoque_flutter/model/transaction.dart';
 import 'package:gestao_estoque_flutter/model/transaction_location.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
@@ -50,6 +51,10 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
 
   List<Location> _locations = [];
 
+  List<Stock> _stock = [];
+
+  int? _qtdStock;
+
   final List<TransactionLocation> _transactionLocations = [];
 
   DateTime? _dateSelected = DateTime.now();
@@ -77,6 +82,39 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
     );
   }
 
+  Future<void> getStock() async {
+    try {
+      if (_warehouseSelected == null || _productSelected == null) {
+        return;
+      }
+      final Map<String, dynamic> queryParameters = {
+        'perPage': 100000,
+        'warehouseId': _warehouseSelected!.id,
+        'productId': _productSelected!.id,
+      };
+
+      if (_aisleSelected != null) {
+        queryParameters['aisleId'] = _aisleSelected!.id;
+      }
+
+      final dio = ApiService().dio;
+      final response = await dio.get(
+        '/stock',
+        queryParameters: queryParameters,
+      );
+      final stock = ResponseApi.fromJson(
+        response.data,
+        (json) => Stock.fromJson(json),
+      );
+
+      setState(() {
+        _stock = stock.data;
+      });
+    } catch (err) {
+      rethrow;
+    }
+  }
+
   Future<List<Aisle>> getAisles(Warehouse warehouse) async {
     try {
       setState(() {
@@ -88,12 +126,13 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       final dio = ApiService().dio;
       final response = await dio.get(
         '/aisle',
-        queryParameters: {'perPage': 100, 'warehouseId': warehouse.id},
+        queryParameters: {'perPage': 1000, 'warehouseId': warehouse.id},
       );
       final aisles = ResponseApi.fromJson(
         response.data,
         (json) => Aisle.fromJson(json),
       );
+
       return aisles.data;
     } catch (err) {
       rethrow;
@@ -116,11 +155,25 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
         '/location',
         queryParameters: {'perPage': 100, 'aisleId': aisle.id},
       );
-      final aisles = ResponseApi.fromJson(
+      final locations = ResponseApi.fromJson(
         response.data,
         (json) => Location.fromJson(json),
       );
-      return aisles.data;
+
+      List<Location> filteredLocations;
+
+      if (_typeSelected == TransactionTypeEnum.outgoing) {
+        filteredLocations = locations.data
+            .where(
+              (location) =>
+                  _stock.any((stock) => stock.locationId == location.id),
+            )
+            .toList();
+      } else {
+        filteredLocations = locations.data;
+      }
+
+      return filteredLocations;
     } catch (err) {
       rethrow;
     } finally {
@@ -128,6 +181,13 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
         _isFetchingLocation = false;
       });
     }
+  }
+
+  int getAvailableQuantity(int locationId) {
+    final stock = _stock
+        .where((stock) => stock.locationId == locationId)
+        .firstOrNull;
+    return stock?.currentStock ?? 0;
   }
 
   Future<List<Warehouse>> getWarehouses() async {
@@ -244,6 +304,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
     );
 
     setState(() {
+      _qtdStock = null;
       _transactionLocations.add(transactionLocation);
       print(transactionLocation.location?.shelf);
       _locationSelected = null;
@@ -275,13 +336,14 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                   (location) => Item(
                     value: location,
                     text:
-                        'Lado: ${location.side} | Prateleira: ${location.shelf}',
+                        'Lado: ${location.side} | Prateleira: ${location.shelf} ${_typeSelected == TransactionTypeEnum.outgoing ? '(Qtd: ${getAvailableQuantity(location.id)})' : ''}',
                   ),
                 )
                 .toList(),
             label: 'Local',
             onChanged: (location) {
               setState(() {
+                _qtdStock = getAvailableQuantity(location.id);
                 _locationSelected = location;
               });
             },
@@ -407,26 +469,6 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                         xs: 12,
                         sm: 6,
                         lg: 3,
-                        child: Select<Product>(
-                          initialValue: _productSelected,
-                          items: products
-                              .map(
-                                (product) =>
-                                    Item(value: product, text: product.name),
-                              )
-                              .toList(),
-                          label: "Produto",
-                          onChanged: (value) {
-                            setState(() {
-                              _productSelected = value;
-                            });
-                          },
-                        ),
-                      ),
-                      ResponsiveGridCol(
-                        xs: 12,
-                        sm: 6,
-                        lg: 3,
                         child: Select<Warehouse>(
                           initialValue: _warehouseSelected,
                           items: warehouses
@@ -440,6 +482,33 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                           label: "Depósito",
                           onChanged: (value) async {
                             _aisles = await getAisles(value);
+                            if (_typeSelected == TransactionTypeEnum.outgoing) {
+                              getStock();
+                            }
+                          },
+                        ),
+                      ),
+                      ResponsiveGridCol(
+                        xs: 12,
+                        sm: 6,
+                        lg: 3,
+                        child: Select<Product>(
+                          initialValue: _productSelected,
+                          items: products
+                              .map(
+                                (product) =>
+                                    Item(value: product, text: product.name),
+                              )
+                              .toList(),
+                          label: "Produto",
+                          onChanged: (value) {
+                            setState(() {
+                              _productSelected = value;
+                              if (_typeSelected ==
+                                  TransactionTypeEnum.outgoing) {
+                                getStock();
+                              }
+                            });
                           },
                         ),
                       ),
@@ -462,6 +531,13 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                           label: "Tipo de Movimentação",
                           onChanged: (value) async {
                             setState(() {
+                              if (value == TransactionTypeEnum.outgoing) {
+                                getStock();
+                              } else {
+                                _qtdStock = null;
+                              }
+                              _transactionLocations.clear();
+                              _locationExists = true;
                               _typeSelected = value;
                             });
                           },
@@ -526,6 +602,10 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                 label: 'Rua',
                                 onChanged: (aisle) async {
                                   _locations = await getLocations(aisle);
+                                  if (_typeSelected ==
+                                      TransactionTypeEnum.outgoing) {
+                                    getStock();
+                                  }
                                 },
                               ),
                             ),
@@ -541,7 +621,7 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(),
-                                    hintText: "Digite a quantidade",
+                                    hintText: "Digite a quantidade ${_qtdStock != null ? '($_qtdStock Max.)' : ''}",
                                     label: Text("Quantidade Movimentada"),
                                     floatingLabelBehavior:
                                         FloatingLabelBehavior.always,
@@ -553,6 +633,9 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                     if (numberQuantity == null ||
                                         numberQuantity < 0) {
                                       return "Preencha a quantidade movimentada";
+                                    }
+                                    if(_qtdStock != null && _qtdStock! < numberQuantity) {
+                                      return "Quantidade superior ao estoque ($_qtdStock Qtd. Estoque)";
                                     }
                                     return null;
                                   },
@@ -572,31 +655,36 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                   mainAxisAlignment:
                                       MainAxisAlignment.spaceBetween,
                                   children: [
-                                    OutlinedButton.icon(
-                                      onPressed: () {
-                                        setState(() {
-                                          _locationExists = !_locationExists;
-                                        });
-                                      },
-                                      icon: const Icon(
-                                        Icons.add_location_alt_outlined,
-                                        color: Colors.blue, // 🔹 Cor do ícone
-                                      ),
-                                      label: Text(
-                                        _locationExists
-                                            ? "Novo Local"
-                                            : "Selecionar Local",
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                        ), // 🔹 Cor do texto
-                                      ),
-                                      style: OutlinedButton.styleFrom(
-                                        side: const BorderSide(
-                                          color: Colors.blue,
-                                          width: 1.5,
+                                    if (_typeSelected ==
+                                        TransactionTypeEnum.incoming)
+                                      OutlinedButton.icon(
+                                        onPressed: () {
+                                          setState(() {
+                                            _locationExists = !_locationExists;
+                                          });
+                                        },
+                                        icon: const Icon(
+                                          Icons.add_location_alt_outlined,
+                                          color: Colors.blue, // 🔹 Cor do ícone
+                                        ),
+                                        label: Text(
+                                          _locationExists
+                                              ? "Novo Local"
+                                              : "Selecionar Local",
+                                          style: TextStyle(
+                                            color: Colors.blue,
+                                          ), // 🔹 Cor do texto
+                                        ),
+                                        style: OutlinedButton.styleFrom(
+                                          side: const BorderSide(
+                                            color: Colors.blue,
+                                            width: 1.5,
+                                          ),
                                         ),
                                       ),
-                                    ),
+                                    if (_typeSelected !=
+                                        TransactionTypeEnum.incoming)
+                                      SizedBox(),
                                     IconButton(
                                       icon: Icon(Icons.add),
                                       style: ButtonStyle(

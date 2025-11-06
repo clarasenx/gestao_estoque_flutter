@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:gestao_estoque_flutter/notifier/products_notifier.dart';
 import 'package:gestao_estoque_flutter/provider/auth_provider.dart';
 import 'package:gestao_estoque_flutter/views/app/home_page.dart';
 import 'package:gestao_estoque_flutter/views/login/login_page.dart';
+import 'package:provider/provider.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,17 +24,20 @@ class MyApp extends ConsumerWidget {
     final authStatus = ref.watch(authStateProvider);
     final errorStatus = ref.watch(loginErrorProvider);
 
-    return MaterialApp(
-      theme: ThemeData(colorSchemeSeed: Colors.blue),
-      debugShowCheckedModeBanner: false,
-      title: 'Gestão de Estoque',
-      home: switch (authStatus) {
-        AuthStatus.loading => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
-        AuthStatus.loggedOut => LoginPage(errorMessage: errorStatus,),
-        AuthStatus.loggedIn => const HomePage(),
-      },
+    return ChangeNotifierProvider(
+      create: (_) => ProductsNotifier(),
+      child: MaterialApp(
+        theme: ThemeData(colorSchemeSeed: Colors.blue),
+        debugShowCheckedModeBanner: false,
+        title: 'Gestão de Estoque',
+        home: switch (authStatus) {
+          AuthStatus.loading => const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          ),
+          AuthStatus.loggedOut => LoginPage(errorMessage: errorStatus,),
+          AuthStatus.loggedIn => const HomePage(),
+        },
+      ),
     );
   }
 }

@@ -41,6 +41,7 @@ class Transaction {
   });
 
   factory Transaction.fromJson(Map<String, dynamic> json) {
+    print(json['transactionLocations']);
     return Transaction(
       id: json['id'] as int,
       productId: json['productId'],
@@ -48,9 +49,9 @@ class Transaction {
           ? Product.fromJson(json['product'])
           : null,
       totalQuantity: json['totalQuantity'],
-      transactionLocations: json['transactionLocations']?.map(
+      transactionLocations: json['transactionLocations'] != null ? (json['transactionLocations'] as List).map(
         (tl) => TransactionLocation.fromJson(tl),
-      ),
+      ).toList() : null,
       userId: json['userId'],
       user: json['user'] != null ? User.fromJson(json['user']) : null,
       warehouseId: json['warehouseId'],

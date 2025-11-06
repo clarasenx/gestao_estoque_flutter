@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
+import 'package:gestao_estoque_flutter/model/enum/form_type_enum.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
 
 class CreateWarehousePage extends StatefulWidget {
-  const CreateWarehousePage({super.key});
+  final Warehouse? warehouse;
+  const CreateWarehousePage({super.key, this.warehouse});
 
   @override
   State<StatefulWidget> createState() => _CreateWarehousePageState();
@@ -15,6 +17,7 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
   final _nameController = TextEditingController();
   final _addressController = TextEditingController();
   bool _isLoading = false;
+  FormType type = FormType.create;
 
   Future<void> createWarehouse() async {
     setState(() {
@@ -33,6 +36,56 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
     setState(() {
       _isLoading = false;
     });
+  }
+
+  Future<void> editWarehouse() async {
+    try {
+      if (widget.warehouse == null) return;
+
+      setState(() {
+        _isLoading = true;
+      });
+      final dio = ApiService().dio;
+
+      final Map<String, dynamic> payload = {};
+
+      bool hasChangeValues = false;
+
+      if (widget.warehouse!.name != _nameController.text) {
+        hasChangeValues = true;
+        payload['name'] = _nameController.text;
+      }
+
+      if (widget.warehouse!.address != _addressController.text) {
+        hasChangeValues = true;
+        payload['address'] = _addressController.text;
+      }
+
+      if (!hasChangeValues) {
+        return;
+      }
+
+      await dio.patch('/warehouse/${widget.warehouse!.id}', data: payload);
+
+      setState(() {
+        _isLoading = false;
+      });
+    } catch (err) {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.warehouse != null) {
+      type = FormType.edit;
+
+      _nameController.text = widget.warehouse!.name;
+      _addressController.text = widget.warehouse!.address;
+    }
   }
 
   @override
@@ -98,8 +151,14 @@ class _CreateWarehousePageState extends State<CreateWarehousePage> {
         isLoading: _isLoading,
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            await createWarehouse();
-            Navigator.pop(context);
+            if (type == FormType.create) {
+              await createWarehouse();
+            } else {
+              await editWarehouse();
+            }
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

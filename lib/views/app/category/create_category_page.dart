@@ -4,9 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
+import 'package:gestao_estoque_flutter/model/enum/form_type_enum.dart';
 
 class CreateCategoryPage extends StatefulWidget {
-  const CreateCategoryPage({super.key});
+  final Category? category;
+  const CreateCategoryPage({super.key, this.category});
 
   @override
   State<StatefulWidget> createState() => _CreateCategoryPageState();
@@ -16,6 +18,7 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   bool _isLoading = false;
+  FormType type = FormType.create;
 
   Future<Category?> createCategory() async {
     setState(() {
@@ -37,10 +40,47 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
     }
   }
 
+  Future<void> editCategory() async {
+    if (widget.category == null ||
+        widget.category!.name == _nameController.text) {
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final dio = ApiService().dio;
+      await dio.patch(
+        '/category/${widget.category!.id}',
+        data: {"name": _nameController.text},
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    if (widget.category != null) {
+      type = FormType.edit;
+      _nameController.text = widget.category!.name;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Criar Nova Categoria")),
+      appBar: AppBar(
+        title: Text(
+          "${type == FormType.create ? 'Criar Nova' : 'Editar'} Categoria",
+        ),
+      ),
       body: Form(
         key: _formKey,
         child: SingleChildScrollView(
@@ -74,9 +114,16 @@ class _CreateCategoryPageState extends State<CreateCategoryPage> {
         isLoading: _isLoading,
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
-            final newCategory = await createCategory();
-            if (context.mounted && newCategory != null) {
-              Navigator.pop(context, newCategory);
+            if (type == FormType.create) {
+              final newCategory = await createCategory();
+              if (context.mounted && newCategory != null) {
+                Navigator.pop(context, newCategory);
+              }
+            } else {
+              await editCategory();
+              if (context.mounted) {
+                Navigator.pop(context);
+              }
             }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(

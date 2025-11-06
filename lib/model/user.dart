@@ -27,9 +27,9 @@ class User {
     return User(
       id: json['id'],
       name: json['name'],
-      roles: (json['roles'] as List<dynamic>)
+      roles: json['roles'] != null ? (json['roles'] as List<dynamic>)
           .map((role) => UserRole.fromJson(role))
-          .toList(),
+          .toList() : null,
       password: json['password'],
       phone: json['phone'],
       register: json['register'],

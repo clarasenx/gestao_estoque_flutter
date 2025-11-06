@@ -23,20 +23,16 @@ class TransactionsTable extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(
           child: PaginatedDataTable2(
-            autoRowsToHeight: true,
             columnSpacing: 12,
             minWidth: 786,
             dividerThickness: 0,
             horizontalMargin: 12,
             dataRowHeight: 56,
-            headingTextStyle: Theme
-                .of(
+            headingTextStyle: Theme.of(
               context,
-            )
-                .textTheme
-                .titleMedium
-                ?.copyWith(color: Colors.white),
+            ).textTheme.titleMedium?.copyWith(color: Colors.white),
             headingRowColor: WidgetStatePropertyAll(Colors.blueAccent),
+            rowsPerPage: 12,
             headingRowDecoration: const BoxDecoration(
               borderRadius: BorderRadius.only(
                 topLeft: Radius.circular(12),
@@ -74,9 +70,13 @@ class TransactionData extends DataTableSource {
       cells: ([
         DataCell(Text(transaction.product?.name ?? '')),
         DataCell(Text(transaction.totalQuantity.toString())),
-        DataCell(Text(transaction.type == TransactionTypeEnum.incoming
-            ? 'Entrada'
-            : 'Saída')),
+        DataCell(
+          Text(
+            transaction.type == TransactionTypeEnum.incoming
+                ? 'Entrada'
+                : 'Saída',
+          ),
+        ),
         DataCell(Text(transaction.warehouse?.name ?? '')),
         DataCell(Text(transaction.user?.name ?? '')),
         DataCell(Text(DateFormat('dd/MM/yyyy').format(transaction.date))),
@@ -92,6 +92,7 @@ class TransactionData extends DataTableSource {
 
   @override
   int get selectedRowCount => 0;
+
 }
 
 class TransactionsController extends GetxController {
@@ -108,15 +109,21 @@ class TransactionsController extends GetxController {
     try {
       isLoading.value = true;
       final dio = ApiService().dio;
-      final response = await dio.get('/transaction');
+      final response = await dio.get(
+        '/transaction',
+        queryParameters: {"perPage": 1000},
+      );
 
       if (response.statusCode == 200) {
         final data = response.data;
         final productsResponse = ResponseApi.fromJson(
-            data, (json) => Transaction.fromJson(json));
+          data,
+          Transaction.fromJson,
+        );
         transactions.value = productsResponse.data;
       }
     } catch (e) {
+      print(e);
     } finally {
       isLoading.value = false;
     }

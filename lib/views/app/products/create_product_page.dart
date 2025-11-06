@@ -6,10 +6,12 @@ import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
 import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
+import 'package:gestao_estoque_flutter/model/enum/form_type_enum.dart';
 import 'package:get/get.dart';
 
 class CreateProductPage extends StatefulWidget {
-  const CreateProductPage({super.key});
+  final Product? product;
+  const CreateProductPage({super.key, this.product});
 
   @override
   State<StatefulWidget> createState() => _CreateProductPageState();
@@ -26,10 +28,28 @@ class _CreateProductPageState extends State<CreateProductPage> {
   final _minimumStockController = TextEditingController();
 
   bool _isLoading = false;
+  FormType type = FormType.create;
 
   @override
   void initState() {
     super.initState();
+    if (widget.product != null) {
+      type = FormType.edit;
+
+      _nameController.text = widget.product!.name;
+
+      if (widget.product!.description != null) {
+        _descriptionController.text = widget.product!.description!;
+      }
+
+      if (widget.product!.minimumStock != null) {
+        _minimumStockController.text = widget.product!.minimumStock!.toString();
+      }
+
+      if (widget.product!.expirationDate != null) {
+        _dateController.text = formatDate(widget.product!.expirationDate!);
+      }
+    }
     _dataFuture = getCategories();
   }
 
@@ -48,13 +68,87 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
       final data = response.data;
 
-      final ResponseApi<Category> categories = ResponseApi.fromJson(data, (json)=> Category.fromJson(json));
+      final ResponseApi<Category> categories = ResponseApi.fromJson(
+        data,
+        (json) => Category.fromJson(json),
+      );
+
+      if (type == FormType.edit && widget.product!.category != null) {
+        _selectedCategory = categories.data
+            .where((cat) => cat.id == widget.product!.category!.id)
+            .firstOrNull;
+      }
 
       return categories;
     } catch (err) {
       print(err);
       throw err;
     } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  Future<void> editProduct() async {
+    try {
+      if (widget.product == null) return;
+
+      setState(() {
+        _isLoading = true;
+      });
+      final dio = ApiService().dio;
+
+      final Map<String, dynamic> payload = {};
+
+      final bool hasExpirationDate = _dateController.text.isNotEmpty;
+      bool hasChangeValues = false;
+
+      if (widget.product!.name != _nameController.text) {
+        hasChangeValues = true;
+        payload['name'] = _nameController.text;
+      }
+
+      if (widget.product!.description != _descriptionController.text) {
+        hasChangeValues = true;
+        payload['description'] = _descriptionController.text;
+      }
+
+      if (_selectedCategory != null &&
+          widget.product!.categoryId != _selectedCategory!.id) {
+        hasChangeValues = true;
+        payload['categoryId'] = _selectedCategory!.id;
+      }
+
+      if (_minimumStockController.text.isNotEmpty &&
+          widget.product!.minimumStock?.toString() !=
+              _minimumStockController.text) {
+        hasChangeValues = true;
+        payload['minimumStock'] = _minimumStockController.text;
+      }
+      if (hasExpirationDate &&
+          (widget.product!.expirationDate == null ||
+              formatDate(widget.product!.expirationDate!) !=
+                  _dateController.text)) {
+        hasChangeValues = true;
+        final parts = _dateController.text.split('/'); // ['10', '10', '2025']
+        payload['expirationDate'] = DateTime(
+          int.parse(parts[2]), // ano
+          int.parse(parts[1]), // mês
+          int.parse(parts[0]), // dia
+        );
+      }
+      if (!hasChangeValues) {
+        return;
+      }
+      await dio.patch('/product/${widget.product!.id}', data: payload);
+
+      setState(() {
+        _isLoading = false;
+      });
+
+      Get.find<ProductsController>().fetchProducts(null);
+    } catch (err) {
       setState(() {
         _isLoading = false;
       });
@@ -92,7 +186,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
       _isLoading = false;
     });
 
-    Get.find<ProductsController>().fetchProducts();
+    Get.find<ProductsController>().fetchProducts(null);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -105,16 +199,23 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
     if (pickedDate != null) {
       setState(() {
-        _dateController.text =
-            "${pickedDate.day.toString().padLeft(2, '0')}/${pickedDate.month.toString().padLeft(2, '0')}/${pickedDate.year}";
+        _dateController.text = formatDate(pickedDate);
       });
     }
+  }
+
+  String formatDate(DateTime date) {
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("Criar Novo Produto")),
+      appBar: AppBar(
+        title: Text(
+          "${type == FormType.create ? 'Criar Nova' : 'Editar'} Produto",
+        ),
+      ),
       body: FutureBuilder(
         future: _dataFuture,
         builder: (context, asyncSnapshot) {
@@ -270,8 +371,14 @@ class _CreateProductPageState extends State<CreateProductPage> {
         isLoading: _isLoading,
         onPressed: () async {
           if (_formKey.currentState!.validate() && _selectedCategory != null) {
-            await createProduct();
-            Navigator.pop(context);
+            if (type == FormType.create) {
+              await createProduct();
+            } else {
+              await editProduct();
+            }
+            if (context.mounted) {
+              Navigator.pop(context);
+            }
           } else {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(

@@ -14,6 +14,7 @@ class Select<Type> extends StatelessWidget {
   final bool disable;
   final bool isRequired;
   final Function(Type value) onChanged;
+  final double padding;
 
   Select({
     super.key,
@@ -23,12 +24,13 @@ class Select<Type> extends StatelessWidget {
     required this.onChanged,
     this.disable = false,
     this.isRequired = true,
+    this.padding = 10,
   });
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.all(10),
+      padding: EdgeInsets.all(padding),
       child: DropdownButtonFormField<Type>(
         initialValue: initialValue,
         items: items
