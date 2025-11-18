@@ -1,10 +1,9 @@
 import 'package:data_table_2/data_table_2.dart';
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/confirm_dialog.dart';
-import 'package:gestao_estoque_flutter/model/Category.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/views/app/products/create_product_page.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
@@ -52,7 +51,7 @@ class ProductsTable extends StatelessWidget {
             ],
             source: ProductData(
               refresh: refresh,
-              products: controller.products,
+              controller: controller,
               context: context,
             ),
           ),
@@ -63,21 +62,21 @@ class ProductsTable extends StatelessWidget {
 }
 
 class ProductData extends DataTableSource {
-  final List<Product> products;
+  final ProductsController controller;
   final BuildContext context;
   final void Function() refresh;
 
   ProductData({
     required this.refresh,
-    required this.products,
+    required this.controller,
     required this.context,
   });
 
   @override
   DataRow? getRow(int index) {
-    if (index >= products.length) return null;
+    if (index >= controller.products.length) return null;
 
-    final product = products[index];
+    final product = controller.products[index];
 
     return DataRow2(
       cells: ([
@@ -101,7 +100,7 @@ class ProductData extends DataTableSource {
         ),
         DataCell(
           Row(
-            spacing: 10,
+            spacing: 3,
             children: [
               IconButton(
                 onPressed: () async {
@@ -111,6 +110,7 @@ class ProductData extends DataTableSource {
                       builder: (context) => CreateProductPage(product: product),
                     ),
                   );
+                  controller.fetchProducts(null);
                 },
                 icon: Icon(Icons.edit, color: Colors.blueAccent),
               ),
@@ -140,7 +140,7 @@ class ProductData extends DataTableSource {
   bool get isRowCountApproximate => false;
 
   @override
-  int get rowCount => products.length;
+  int get rowCount => controller.products.length;
 
   @override
   int get selectedRowCount => 0;

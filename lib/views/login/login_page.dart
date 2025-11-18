@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:gestao_estoque_flutter/components/buttom.dart';
 import 'package:gestao_estoque_flutter/provider/auth_provider.dart';
-import 'package:gestao_estoque_flutter/service/auth_service.dart';
 
 const users = [
   {'cpf': '1234', 'password': 'asdf'},
@@ -21,9 +20,9 @@ class LoginPage extends ConsumerStatefulWidget {
 
 class _LoginPageState extends ConsumerState<LoginPage> {
   final _formKey = GlobalKey<FormState>();
-  final _authService = AuthService();
   final _cpfController = TextEditingController();
   final _passwordController = TextEditingController();
+  bool showPassword = false;
 
   @override
   Widget build(BuildContext context) {
@@ -107,10 +106,22 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                                 fillColor: Colors.white,
                                 hintText: 'Senha',
                                 border: OutlineInputBorder(),
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    showPassword
+                                        ? Icons.visibility_off
+                                        : Icons.visibility,
+                                  ),
+                                  onPressed: () {
+                                    setState(() {
+                                      showPassword = !showPassword;
+                                    });
+                                  },
+                                ),
                               ),
-                              obscureText: true,
+                              obscureText: !showPassword,
                               validator: (value) {
-                                if(value == null || value.isEmpty) {
+                                if (value == null || value.isEmpty) {
                                   return "Preencha a senha";
                                 }
                                 return null;
@@ -118,7 +129,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                             ),
                             if (widget.errorMessage != null) ...[
                               SizedBox(height: 20),
-                              Text(widget.errorMessage!, style: TextStyle(color: Colors.redAccent),),
+                              Text(
+                                widget.errorMessage!,
+                                style: TextStyle(color: Colors.redAccent),
+                              ),
                             ],
                             SizedBox(height: 24),
                             AppButton(

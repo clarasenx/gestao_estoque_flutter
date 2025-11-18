@@ -33,11 +33,19 @@ class Select<Type> extends StatelessWidget {
       padding: EdgeInsets.all(padding),
       child: DropdownButtonFormField<Type>(
         initialValue: initialValue,
+        isExpanded: true,
         items: items
             .map(
               (item) => DropdownMenuItem<Type>(
                 value: item.value,
-                child: Text(item.text),
+                child: ConstrainedBox(
+                  constraints: const BoxConstraints(maxWidth: double.infinity),
+                  child: Text(
+                    item.text,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
               ),
             )
             .toList(),

@@ -27,7 +27,19 @@ class _EditUserPageState extends State<EditUserPage> {
   late TextEditingController nameController;
   late TextEditingController phoneController;
 
+  // Controllers para senha
+  final TextEditingController passwordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
+
   bool _isLoading = false;
+
+  /// controle do modo atual (editar dados OU alterar senha)
+  bool isChangingPassword = false;
+
+  /// controle de visibilidade
+  bool showPassword = false;
+  bool showConfirmPassword = false;
 
   @override
   void initState() {
@@ -43,10 +55,11 @@ class _EditUserPageState extends State<EditUserPage> {
     try {
       final userId = await _auth.isAuth();
 
-      await _api.dio.patch(
-        '/user/$userId',
-        data: {'name': nameController.text, 'phone': phoneController.text},
-      );
+      final data = isChangingPassword
+          ? {"password": passwordController.text}
+          : {"name": nameController.text, "phone": phoneController.text};
+
+      await _api.dio.patch('/user/$userId', data: data);
 
       if (mounted) Navigator.pop(context);
     } catch (e) {
@@ -64,8 +77,11 @@ class _EditUserPageState extends State<EditUserPage> {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        iconTheme: IconThemeData(color: Colors.white),
-        title: Text("Editar Perfil", style: TextStyle(color: Colors.white)),
+        iconTheme: const IconThemeData(color: Colors.white),
+        title: const Text(
+          "Editar Perfil",
+          style: TextStyle(color: Colors.white),
+        ),
         backgroundColor: Colors.blueAccent,
       ),
       body: Column(
@@ -94,14 +110,85 @@ class _EditUserPageState extends State<EditUserPage> {
                             textAlign: TextAlign.center,
                           ),
                           const SizedBox(height: 24),
-                          _buildTextField('Nome', nameController),
+
+                          // BOTÃO DE ALTERAR SENHA
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: () {
+                                setState(() {
+                                  isChangingPassword = !isChangingPassword;
+                                });
+                              },
+                              child: Text(
+                                isChangingPassword ? "Voltar" : "Alterar Senha",
+                                style: const TextStyle(fontSize: 16),
+                              ),
+                            ),
+                          ),
+
                           const SizedBox(height: 12),
-                          _buildTextField('Telefone', phoneController),
+
+                          // ------------ CAMPOS NORMAIS -------------
+                          if (!isChangingPassword) ...[
+                            _buildTextField(
+                              "Nome",
+                              nameController,
+                              TextInputType.text,
+                            ),
+                            const SizedBox(height: 12),
+                            _buildTextField(
+                              "Telefone",
+                              phoneController,
+                              TextInputType.number,
+                            ),
+                          ],
+
+                          // ------------ CAMPOS DE ALTERAR SENHA -------------
+                          if (isChangingPassword) ...[
+                            _buildPasswordField(
+                              label: "Nova Senha",
+                              controller: passwordController,
+                              show: showPassword,
+                              onToggle: () {
+                                setState(() {
+                                  showPassword = !showPassword;
+                                });
+                              },
+                            ),
+                            const SizedBox(height: 12),
+                            _buildPasswordField(
+                              label: "Confirmar Senha",
+                              controller: confirmPasswordController,
+                              show: showConfirmPassword,
+                              onToggle: () {
+                                setState(() {
+                                  showConfirmPassword = !showConfirmPassword;
+                                });
+                              },
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return "Campo obrigatório";
+                                }
+                                if (value.length < 6) {
+                                  return "Senha deve conter no mínimo 6 caracteres";
+                                }
+                                if (value != passwordController.text) {
+                                  return "As senhas não coincidem";
+                                }
+                                return null;
+                              },
+                            ),
+                          ],
+
                           const SizedBox(height: 32),
+
                           AppButton(
-                            text: 'Salvar Alterações',
+                            text: isChangingPassword
+                                ? "Salvar Nova Senha"
+                                : "Salvar Alterações",
                             icon: Icons.save,
-                            onPressed: _isLoading ? null : () => saveUser(),
+                            onPressed: _isLoading ? null : saveUser,
                           ),
                         ],
                       ),
@@ -116,15 +203,67 @@ class _EditUserPageState extends State<EditUserPage> {
     );
   }
 
-  Widget _buildTextField(String label, TextEditingController controller) {
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller,
+    TextInputType? type,
+  ) {
     return TextFormField(
+      keyboardType: type,
       controller: controller,
       decoration: InputDecoration(
         labelText: label,
         border: const OutlineInputBorder(),
       ),
-      validator: (value) =>
-          (value == null || value.isEmpty) ? 'Campo obrigatório' : null,
+      validator: (value) {
+        if (value == null || value.isEmpty) {
+          return 'Campo obrigatório';
+        }
+        if (type == TextInputType.number) {
+          final isOnlyNumbers = RegExp(r'^[0-9]+$').hasMatch(value);
+          if (!isOnlyNumbers) {
+            return 'Digite apenas números';
+          }
+          if (value.length < 10 || value.length > 11) {
+            return 'Telefone deve conter ddd. ex.: 69123456789';
+          }
+        }else {
+          if (value.length < 2) {
+            return 'O nome deve conter no mínimo 2 caracteres';
+          }
+        }
+      },
+    );
+  }
+
+  Widget _buildPasswordField({
+    required String label,
+    required TextEditingController controller,
+    required bool show,
+    required VoidCallback onToggle,
+    FormFieldValidator<String>? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      obscureText: !show,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+        suffixIcon: IconButton(
+          icon: Icon(show ? Icons.visibility_off : Icons.visibility),
+          onPressed: onToggle,
+        ),
+      ),
+      validator:
+          validator ??
+          (value) {
+            if (value == null || value.isEmpty) {
+              return "Campo obrigatório";
+            }
+            if (value.length < 6) {
+              return "Senha deve conter no mínimo 6 caracteres";
+            }
+          },
     );
   }
 }

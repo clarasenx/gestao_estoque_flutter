@@ -30,28 +30,28 @@ class Product {
 
   factory Product.fromJson(Map<String, dynamic> json) {
     return Product(
-      id: json['id'] as int,
-      name: json['name'] as String,
-      description: json['description'] as String,
-      categoryId: json['categoryId'] as int,
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      categoryId: json['categoryId'],
       category: json['category'] != null
           ? Category.fromJson(json['category'])
           : null,
       currentStock: json['currentStock'] != null
-          ? json['currentStock'] as int
+          ? json['currentStock']
           : 0,
       minimumStock: json['minimumStock'],
       expirationDate: json['expirationDate'] != null
-          ? DateTime.parse(json['expirationDate'] as String)
+          ? DateTime.parse(json['expirationDate'])
           : null,
       createdAt: json['createdAt'] != null
-          ? DateTime.parse(json['createdAt'] as String)
+          ? DateTime.parse(json['createdAt'])
           : null,
       updatedAt: json['updatedAt'] != null
-          ? DateTime.parse(json['updatedAt'] as String)
+          ? DateTime.parse(json['updatedAt'])
           : null,
       deletedAt: json['deletedAt'] != null
-          ? DateTime.parse(json['deletedAt'] as String)
+          ? DateTime.parse(json['deletedAt'])
           : null,
     );
   }

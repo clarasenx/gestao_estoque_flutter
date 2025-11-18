@@ -90,6 +90,7 @@ class _FilterDatabaseState extends State<FilterDatabase> {
               child: Padding(
                 padding: const EdgeInsets.all(8),
                 child: TextFormField(
+                  autofocus: false,
                   controller: widget.nameController,
                   decoration: const InputDecoration(
                     labelText: 'Nome',

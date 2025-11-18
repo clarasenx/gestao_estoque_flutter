@@ -2,9 +2,15 @@ import 'package:flutter/material.dart';
 
 class Header extends StatelessWidget {
   final String title;
+  final String buttonDescription;
   final void Function()? onPressed;
 
-  const Header({required this.title, this.onPressed, super.key});
+  const Header({
+    required this.title, 
+    this.buttonDescription = "Adicionar",
+    this.onPressed, 
+    super.key
+    });
 
   @override
   Widget build(BuildContext context) {
@@ -20,7 +26,7 @@ class Header extends StatelessWidget {
             ),
             FilledButton.icon(
               icon: Icon(Icons.add),
-              label: Text("Adicionar"),
+              label: Text(buttonDescription),
               onPressed: onPressed,
               style: FilledButton.styleFrom(
                 backgroundColor: Colors.blueAccent, // cor de fundo

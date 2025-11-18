@@ -5,6 +5,8 @@ import 'package:gestao_estoque_flutter/components/stock_table.dart';
 import 'package:gestao_estoque_flutter/components/warehouse_kpi.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/views/app/aisle/create_aisle_page.dart';
+import 'package:gestao_estoque_flutter/views/app/transaction/create_transaction_page.dart';
+import 'package:get/get.dart';
 
 class DetailWarehousePage extends StatelessWidget {
   final Warehouse warehouse;
@@ -22,15 +24,60 @@ class DetailWarehousePage extends StatelessWidget {
           child: Column(
             children: [
               WarehouseKpi(warehouseId: warehouse.id),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+
+              const SizedBox(height: 10),
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                runAlignment: WrapAlignment.spaceBetween,
+                spacing: 10,
+                runSpacing: 10,
                 children: [
-                  Text(
-                    "Produtos em Estoque:",
-                    style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      "Produtos em Estoque:",
+                      style: TextStyle(
+                        fontSize: 30,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                  SizedBox(
+                    width: double.infinity,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        FilledButton.icon(
+                          icon: Icon(Icons.add),
+                          label: Text("Realizar Transação"),
+                          onPressed: () async {
+                            await Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateTransactionPage(
+                                  warehouseId: warehouse.id,
+                                ),
+                              ),
+                            );
+                            Get.find<StockController>().fetchStock();
+                          },
+                          style: FilledButton.styleFrom(
+                            backgroundColor: Colors.blueAccent,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
+              const SizedBox(height: 20),
 
               SizedBox(
                 height: 500,

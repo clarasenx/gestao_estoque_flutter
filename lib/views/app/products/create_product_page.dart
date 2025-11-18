@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:gestao_estoque_flutter/components/form_button.dart';
 import 'package:gestao_estoque_flutter/components/product_table.dart';
+import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/model/category.dart';
+import 'package:gestao_estoque_flutter/model/enum/form_type_enum.dart';
 import 'package:gestao_estoque_flutter/model/product.dart';
 import 'package:gestao_estoque_flutter/model/response.dart';
-import 'package:gestao_estoque_flutter/config/api.dart';
 import 'package:gestao_estoque_flutter/utils/getBreakpoints.dart';
-import 'package:gestao_estoque_flutter/model/enum/form_type_enum.dart';
 import 'package:get/get.dart';
 
 class CreateProductPage extends StatefulWidget {
@@ -81,7 +81,6 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
       return categories;
     } catch (err) {
-      print(err);
       throw err;
     } finally {
       setState(() {
@@ -126,6 +125,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
         hasChangeValues = true;
         payload['minimumStock'] = _minimumStockController.text;
       }
+
       if (hasExpirationDate &&
           (widget.product!.expirationDate == null ||
               formatDate(widget.product!.expirationDate!) !=
@@ -136,8 +136,9 @@ class _CreateProductPageState extends State<CreateProductPage> {
           int.parse(parts[2]), // ano
           int.parse(parts[1]), // mês
           int.parse(parts[0]), // dia
-        );
+        ).toIso8601String();
       }
+
       if (!hasChangeValues) {
         return;
       }
@@ -168,10 +169,10 @@ class _CreateProductPageState extends State<CreateProductPage> {
     final product = Product(
       id: 0,
       name: _nameController.text,
-      description: _descriptionController.text,
+      description: _descriptionController.text.isNotEmpty ? _descriptionController.text : null,
       categoryId: _selectedCategory!.id,
       currentStock: 0,
-      minimumStock: int.parse(_minimumStockController.text),
+      minimumStock: _minimumStockController.text.isNotEmpty ? int.parse(_minimumStockController.text) : null,
       expirationDate: hasExpirationDate
           ? DateTime(
               int.parse(parts[2]), // ano
@@ -185,8 +186,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
     setState(() {
       _isLoading = false;
     });
-
-    Get.find<ProductsController>().fetchProducts(null);
+    Get.put(ProductsController()).fetchProducts(null);
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -265,7 +265,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                       decoration: InputDecoration(
                         border: OutlineInputBorder(),
                         hintText: "Digite a descrição do produto",
-                        label: Text("Descrição do Produto"),
+                        label: Text("Descrição do Produto (opcional)"),
                         floatingLabelBehavior: FloatingLabelBehavior.always,
                       ),
                       maxLength: 255,
@@ -298,7 +298,8 @@ class _CreateProductPageState extends State<CreateProductPage> {
                               });
                             },
                             decoration: const InputDecoration(
-                              labelText: "Categoria",
+                              hintText: "Selecione uma categoria",
+                              label: Text("Categoria"),
                               border: OutlineInputBorder(),
                             ),
                             validator: (value) => value == null
@@ -326,7 +327,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                             controller: _dateController,
                             readOnly: true,
                             decoration: InputDecoration(
-                              labelText: "Data de Validade",
+                              labelText: "Data de Validade (opcional)",
                               border: const OutlineInputBorder(),
                               suffixIcon: Row(
                                 mainAxisSize: MainAxisSize.min,

@@ -81,7 +81,15 @@ class AisleListState extends State<AisleList> {
 
         if (aisles?.data.isEmpty == true) {
           return Center(
-            child: Text("Este depósito não possuí ruas cadastradas."),
+            child: Column(
+              children: [
+                Text(
+                  "Este depósito não possuí ruas cadastradas.",
+                  style: TextStyle(fontSize: 16),
+                  ),
+                SizedBox(height: 50),
+              ],
+            ),
           );
         }
 

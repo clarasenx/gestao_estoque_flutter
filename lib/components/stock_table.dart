@@ -20,6 +20,19 @@ class StockTable extends StatelessWidget {
       if (controller.isLoading.value) {
         return const Center(child: CircularProgressIndicator());
       }
+
+      if (controller.stocks.isEmpty) {
+        return Padding(
+          padding: const EdgeInsets.symmetric(vertical: 12),
+          child: Center(
+            child: Text(
+              'Não há produtos em estoque neste depósito.',
+              style: TextStyle(fontSize: 16),
+            ),
+          ),
+        );
+      }
+
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(
@@ -150,7 +163,7 @@ class StockController extends GetxController {
         stocks.value = stocksResponse.data;
       }
     } catch (e) {
-      print("Erro ao buscar produtos: $e");
+      print("Erro ao buscar stock: $e");
     } finally {
       isLoading.value = false;
     }

@@ -18,6 +18,7 @@ import 'package:gestao_estoque_flutter/model/transaction_location.dart';
 import 'package:gestao_estoque_flutter/model/warehouse.dart';
 import 'package:gestao_estoque_flutter/service/transaction_service.dart';
 import 'package:gestao_estoque_flutter/views/app/warehouse/create_warehouse_page.dart';
+import 'package:get/get.dart';
 import 'package:responsive_grid/responsive_grid.dart';
 
 class DataFuture {
@@ -28,7 +29,9 @@ class DataFuture {
 }
 
 class CreateTransactionPage extends StatefulWidget {
-  const CreateTransactionPage({super.key});
+  final int? warehouseId;
+
+  const CreateTransactionPage({super.key, this.warehouseId});
 
   @override
   State<StatefulWidget> createState() => _CreateTransactionState();
@@ -39,7 +42,6 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
   final _transactionFormKey = GlobalKey<FormState>();
   final _transactionLocationFormKey = GlobalKey<FormState>();
   final _dateController = TextEditingController();
-  final TextEditingController _searchController = TextEditingController();
   final TextEditingController _quantityController = TextEditingController();
 
   final TextEditingController _shelfController = TextEditingController();
@@ -76,6 +78,16 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
   Future<DataFuture> getData() async {
     final futureData = [getWarehouses(), getProducts(null)];
     final data = await Future.wait(futureData);
+
+    if (widget.warehouseId != null) {
+      _warehouseSelected = (data[0] as List<Warehouse>).firstWhereOrNull(
+        (w) => w.id == widget.warehouseId,
+      );
+      if (_warehouseSelected != null) {
+        _aisles = await getAisles(_warehouseSelected!);
+      }
+    }
+
     return DataFuture(
       warehouses: data[0] as List<Warehouse>,
       products: data[1] as List<Product>,
@@ -148,7 +160,6 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       setState(() {
         _isFetchingLocation = true;
         _locationSelected = null;
-        _aisleSelected = aisle;
       });
       final dio = ApiService().dio;
       final response = await dio.get(
@@ -235,16 +246,15 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
         warehouseId: _warehouseSelected!.id,
         date: _dateSelected!,
         type: _typeSelected!,
-        createTransactionLocations: _transactionLocations.map((tl) {
-          print(tl.location?.side);
-          print(tl.location?.shelf);
-          print(tl.locationId);
-          return CreateTransactionLocationByTransactionLocation(
-            locationId: tl.locationId != 0 ? tl.locationId : null,
-            location: tl.locationId == 0 ? tl.location : null,
-            quantity: tl.quantity,
-          );
-        }).toList(),
+        createTransactionLocations: _transactionLocations
+            .map(
+              (tl) => CreateTransactionLocationByTransactionLocation(
+                locationId: tl.locationId != 0 ? tl.locationId : null,
+                location: tl.locationId == 0 ? tl.location : null,
+                quantity: tl.quantity,
+              ),
+            )
+            .toList(),
       );
 
       await _transactionService.create(transaction);
@@ -359,8 +369,8 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
         child: Select<String>(
           initialValue: null,
           items: [
-            Item(value: "Direita", text: "Direita"),
-            Item(value: "Esquerda", text: "Esquerda"),
+            Item(value: "Direito", text: "Direito"),
+            Item(value: "Esquerdo", text: "Esquerdo"),
           ],
           label: "Lado da Prateleira",
           onChanged: (value) async {
@@ -408,10 +418,6 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
     _dateController.text = currentDateString;
 
     _dataFuture = getData();
-    _searchController.addListener(() {
-      final value = _searchController.text;
-      getProducts(value); // sua função de pesquisa
-    });
   }
 
   @override
@@ -481,10 +487,10 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                               .toList(),
                           label: "Depósito",
                           onChanged: (value) async {
-                            _aisles = await getAisles(value);
                             if (_typeSelected == TransactionTypeEnum.outgoing) {
-                              getStock();
+                              await getStock();
                             }
+                            _aisles = await getAisles(value);
                           },
                         ),
                       ),
@@ -601,11 +607,14 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                     .toList(),
                                 label: 'Rua',
                                 onChanged: (aisle) async {
-                                  _locations = await getLocations(aisle);
+                                  setState(() {
+                                    _aisleSelected = aisle;
+                                  });
                                   if (_typeSelected ==
                                       TransactionTypeEnum.outgoing) {
-                                    getStock();
+                                    await getStock();
                                   }
+                                  _locations = await getLocations(aisle);
                                 },
                               ),
                             ),
@@ -621,7 +630,8 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                   keyboardType: TextInputType.number,
                                   decoration: InputDecoration(
                                     border: OutlineInputBorder(),
-                                    hintText: "Digite a quantidade ${_qtdStock != null ? '($_qtdStock Max.)' : ''}",
+                                    hintText:
+                                        "Digite a quantidade ${_qtdStock != null ? '($_qtdStock Max.)' : ''}",
                                     label: Text("Quantidade Movimentada"),
                                     floatingLabelBehavior:
                                         FloatingLabelBehavior.always,
@@ -634,7 +644,10 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
                                         numberQuantity < 0) {
                                       return "Preencha a quantidade movimentada";
                                     }
-                                    if(_qtdStock != null && _qtdStock! < numberQuantity) {
+                                    if (_qtdStock != null &&
+                                        _qtdStock! < numberQuantity &&
+                                        _typeSelected ==
+                                            TransactionTypeEnum.outgoing) {
                                       return "Quantidade superior ao estoque ($_qtdStock Qtd. Estoque)";
                                     }
                                     return null;
@@ -723,12 +736,25 @@ class _CreateTransactionState extends State<CreateTransactionPage> {
       bottomNavigationBar: FormButton(
         isLoading: _isLoading,
         onPressed: () async {
+          if (!_transactionFormKey.currentState!.validate()) {
+            return;
+          }
+          if (_transactionLocations.isEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                backgroundColor: Colors.deepOrange,
+                content: Text("Atenção! Insira no mínimo uma localização!"),
+              ),
+            );
+            return;
+          }
           try {
             final success = await createTransaction();
             if (success) {
               Navigator.of(context).pop(true);
             }
           } catch (err) {
+            print('asdasdasdas');
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
                 backgroundColor: Colors.red,
